@@ -56,7 +56,16 @@
       { id: "celeste", colorName: "Celeste", colorHex: "#B9D7F0", image: "assets/productos/vyore/variantes/suplex-lazzo-doble-forro/suplex-lazzo-doble-forro-05-celeste.png", aliases: ["azul"] },
       { id: "negro", colorName: "Negro", colorHex: "#171717", image: "assets/productos/vyore/variantes/suplex-lazzo-doble-forro/suplex-lazzo-doble-forro-06-negro.png" },
     ],
+    "blusa-suplex-amarre": [
+      { id: "azul", colorName: "Azul", colorHex: "#103C9A", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-01-azul.png" },
+      { id: "amarillo", colorName: "Amarillo", colorHex: "#F3D85D", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-02-beige.png", aliases: ["beige"] },
+      { id: "rosado", colorName: "Rosado", colorHex: "#C98A9B", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-03-rosado.png", aliases: ["marron"] },
+      { id: "rojo", colorName: "Rojo", colorHex: "#B31625", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-04-rojo.png" },
+      { id: "verde", colorName: "Verde", colorHex: "#24483F", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-05-verde.png" },
+      { id: "negro", colorName: "Negro", colorHex: "#171717", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-06-negro.png" },
+    ],
   };
+
 
   const SPECIAL_MAIN_IMAGES = {
     "olimpico-suplex": "assets/productos/vyore/olimpico-suplex.png",
