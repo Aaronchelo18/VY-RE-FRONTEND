@@ -1,0 +1,62 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F3EDE4" />
+  <title>Producto | VYÓRE</title>
+  <link rel="icon" href="../assets/vyore/isotipo-vyore.png" type="image/png" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="product.css" />
+</head>
+<body class="product-page-body">
+  <header class="product-page-header">
+    <a class="product-page-brand" href="../" aria-label="Volver a VYÓRE">
+      <img src="../assets/vyore/logo-vyore.png" alt="VYÓRE" />
+    </a>
+    <nav class="product-page-nav" aria-label="Producto">
+      <a href="../#productos">Productos</a>
+      <a href="../carrito/">Carrito</a>
+    </nav>
+  </header>
+
+  <main class="product-page" data-product-page>
+    <section class="product-gallery" aria-label="Imagen de producto">
+      <img id="productImage" alt="" />
+    </section>
+
+    <section class="product-info" aria-labelledby="productName">
+      <p class="eyebrow" id="productCategory">VYÓRE</p>
+      <h1 id="productName"></h1>
+      <p class="product-price" id="productPrice"></p>
+      <p class="product-description" id="productDescription"></p>
+
+      <div class="product-facts">
+        <div><span>Tela</span><strong id="productFabric"></strong></div>
+        <div><span>Tallas</span><strong id="productSizes"></strong></div>
+        <div><span>Detalle</span><strong id="productDetail"></strong></div>
+      </div>
+
+      <section class="product-variants" aria-label="Variantes de color">
+        <div class="variant-title-row">
+          <span>Color</span>
+          <strong id="variantStock">Disponible</strong>
+        </div>
+        <div id="variantOptions" class="variant-options"></div>
+      </section>
+
+      <div class="product-actions">
+        <a id="sendWhatsapp" class="btn primary" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+        <button id="addToCart" class="btn secondary" type="button">Agregar al carrito</button>
+      </div>
+      <a class="back-link" href="../#productos">Volver a productos</a>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../productos.js"></script>
+  <script src="../catalog-utils.js"></script>
+  <script src="product.js"></script>
+</body>
+</html>

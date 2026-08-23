@@ -1,0 +1,285 @@
+.product-page-body {
+  min-height: 100vh;
+  background: var(--beige);
+  color: var(--black);
+}
+
+.product-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 62px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(250, 247, 242, .92);
+  padding: 8px clamp(16px, 6vw, 76px);
+}
+
+.product-page-brand img {
+  width: 112px;
+  height: auto;
+}
+
+.product-page-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.product-page-nav a,
+.back-link {
+  color: var(--wine);
+  font-weight: 760;
+}
+
+.product-page-nav a {
+  min-height: 40px;
+  border: 1px solid var(--soft-line);
+  border-radius: 999px;
+  padding: 9px 14px;
+}
+
+.product-page {
+  display: grid;
+  grid-template-columns: minmax(300px, .92fr) minmax(320px, 1fr);
+  gap: clamp(28px, 6vw, 72px);
+  width: min(1160px, calc(100vw - 36px));
+  margin: 0 auto;
+  padding: clamp(28px, 6vw, 76px) 0;
+}
+
+.product-gallery {
+  display: grid;
+  place-items: center;
+  min-height: 620px;
+  border-radius: var(--radius);
+  background: transparent;
+  overflow: hidden;
+}
+
+.product-gallery img {
+  width: 100%;
+  max-height: 720px;
+  object-fit: contain;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-self: center;
+}
+
+.product-info h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.8rem, 6vw, 5.8rem);
+  font-weight: 500;
+  line-height: .95;
+  letter-spacing: 0;
+}
+
+.product-price {
+  margin: 0;
+  color: var(--wine);
+  font-size: 1.55rem;
+  font-weight: 820;
+}
+
+.product-description {
+  margin: 0;
+  max-width: 560px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.product-facts {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--cream);
+}
+
+.product-facts div {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 16px;
+}
+
+.product-facts div:last-child { border-bottom: 0; }
+.product-facts span,
+.variant-title-row span { color: var(--muted); font-size: .82rem; font-weight: 760; }
+.product-facts strong { font-weight: 720; }
+
+.product-variants {
+  display: grid;
+  gap: 12px;
+}
+
+.variant-title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+}
+
+.variant-title-row strong {
+  color: var(--wine);
+  font-size: .9rem;
+}
+
+.product-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 50;
+  max-width: min(360px, calc(100vw - 36px));
+  border-radius: var(--radius);
+  background: var(--black);
+  color: var(--white);
+  padding: 13px 16px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 860px) {
+  .product-page { grid-template-columns: 1fr; }
+  .product-gallery { min-height: 420px; }
+  .product-info { align-self: start; }
+}
+
+@media (max-width: 560px) {
+  .product-page-header { padding-inline: 14px; }
+  .product-page-brand img { width: 116px; }
+  .product-page-nav a { padding-inline: 10px; font-size: .86rem; }
+  .product-page { width: min(100% - 24px, 1160px); padding-top: 24px; }
+  .product-gallery { min-height: 360px; }
+  .product-facts div { grid-template-columns: 1fr; gap: 4px; }
+  .product-actions { grid-template-columns: 1fr; }
+}
+
+
+.product-page .variant-options {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.product-page .variant-option {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: clamp(190px, 17vw, 230px) auto;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.product-page .variant-option img {
+  width: 100%;
+  height: clamp(190px, 17vw, 230px);
+  object-fit: contain;
+  object-position: center center;
+  background: var(--cream);
+}
+
+
+.product-page .variant-option .variant-info {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 6px 8px;
+  align-items: center;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 9px;
+}
+
+.product-page .variant-option .variant-swatch {
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(23, 23, 23, .18);
+  border-radius: 999px;
+  background: var(--swatch, #817A75);
+}
+
+.product-page .variant-option strong {
+  font-size: .82rem;
+}
+
+.product-page .variant-option em {
+  grid-column: 2;
+  text-align: left;
+  font-size: .76rem;
+}
+
+.product-page .variant-option:disabled img {
+  filter: grayscale(1);
+  opacity: .42;
+}
+
+@media (max-width: 560px) {
+  .product-page .variant-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.product-page--blusa-suplex .product-gallery img {
+  width: 90%;
+  max-height: 650px;
+}
+.product-page .variant-option[data-variant-id] img {
+  padding: 12px 10px 10px;
+}
+
+.product-page .variant-option[data-variant-id="marron"] img,
+.product-page .variant-option[data-variant-id="blanco"] img,
+.product-page .variant-option[data-variant-id="verde"] img,
+.product-page .variant-option[data-variant-id="amarillo"] img,
+.product-page .variant-option[data-variant-id="celeste"] img,
+.product-page .variant-option[data-variant-id="negro"] img {
+  object-fit: contain;
+}
+
+@media (max-width: 560px) {
+  .product-page .variant-option {
+    grid-template-rows: clamp(170px, 42vw, 210px) auto;
+  }
+
+  .product-page .variant-option img {
+    height: clamp(170px, 42vw, 210px);
+  }
+}
+
+/* Keep selected color photos in a stable visual frame. */
+.product-page .product-gallery img {
+  height: clamp(420px, 64vh, 720px);
+  object-fit: contain;
+}
+
+@media (max-width: 860px) {
+  .product-page .product-gallery img {
+    height: clamp(360px, 70vw, 560px);
+  }
+}
+
+@media (max-width: 560px) {
+  .product-page .product-gallery img {
+    height: clamp(300px, 84vw, 430px);
+  }
+}

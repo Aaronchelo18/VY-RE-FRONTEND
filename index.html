@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F3EDE4" />
+  <meta name="description" content="Tienda virtual oficial de VYÓRE. Blusas y tops femeninos con estilo elegante, minimalista y moderno." />
+  <meta property="og:title" content="VYÓRE | Tienda virtual" />
+  <meta property="og:description" content="Nuevos ingresos de blusas y tops VYÓRE." />
+  <meta property="og:image" content="assets/vyore/logo-vyore.png" />
+  <title>VYÓRE | Tienda virtual</title>
+  <link rel="icon" href="assets/vyore/isotipo-vyore.png" type="image/png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header" id="inicio">
+    <nav class="topbar" aria-label="Navegación principal">
+      <button class="menu-toggle" type="button" id="menuToggle" aria-label="Abrir menú" aria-controls="mainNav" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <a class="brand" href="#inicio" aria-label="Inicio VYÓRE">
+        <img src="assets/vyore/logo-vyore.png" alt="VYÓRE" />
+      </a>
+      <div class="main-nav" id="mainNav">
+        <a href="#inicio">Inicio</a>
+        <a href="#productos">Productos</a>
+        <a href="#nuevos">Nuevos ingresos</a>
+        <a href="#vyore">VYÓRE</a>
+        <a href="#contacto">Contacto</a>
+      </div>
+      <a class="cart-nav" href="carrito/" aria-label="Abrir carrito">
+        <span id="headerCartTotal">S/ 0.00</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 18a2 2 0 1 0 .01 0H7Zm10 0a2 2 0 1 0 .01 0H17ZM4.2 4l1.5 9.2A3 3 0 0 0 8.7 16h7.8a3 3 0 0 0 2.9-2.3l1.1-5.2H7.1L6.7 6H3V4h1.2Z" /></svg>
+        <strong id="headerCartCount">0</strong>
+      </a>
+    </nav>
+    <div class="menu-backdrop" id="menuBackdrop"></div>
+
+    <section class="hero" aria-labelledby="mainTitle">
+      <div class="hero-media" aria-hidden="true"></div>
+      <div class="hero-content">
+        <p class="eyebrow">Nuevos ingresos</p>
+        <h1 id="mainTitle">VYÓRE</h1>
+        <p class="hero-text">Simplemente tú.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#productos">Ver prendas</a>
+          <a class="btn subtle" href="https://www.instagram.com/vyore_pe?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">Instagram</a>
+        </div>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="section-block" aria-labelledby="featuredTitle">
+      <div class="section-heading">
+        <p class="eyebrow">Boutique VYÓRE</p>
+        <h2 id="featuredTitle">Productos destacados</h2>
+      </div>
+      <div id="featuredGrid" class="product-grid featured-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="section-block compact-band" id="nuevos" aria-labelledby="newTitle">
+      <div class="section-heading split-heading">
+        <div>
+          <p class="eyebrow">New arrivals</p>
+          <h2 id="newTitle">Nuevos ingresos</h2>
+        </div>
+        <a class="text-link" href="#productos">Ver todo</a>
+      </div>
+      <div id="newGrid" class="new-arrivals" aria-live="polite"></div>
+    </section>
+
+    <section class="brand-story" id="vyore" aria-label="VYÓRE">
+      <div class="story-copy">
+        <p class="eyebrow">VYÓRE</p>
+        <h2>Elegancia limpia para todos los días.</h2>
+        <p>Prendas femeninas, versátiles y modernas para elevar combinaciones simples sin perder comodidad.</p>
+      </div>
+      <div class="story-mark" aria-hidden="true">
+        <img src="assets/vyore/isotipo-vyore.png" alt="" />
+      </div>
+    </section>
+
+    <section class="catalog-toolbar" id="productos" aria-label="Filtros del catálogo">
+      <div class="section-heading">
+        <p class="eyebrow" id="activeCategoryName">Todos los productos</p>
+        <h2>Productos</h2>
+      </div>
+      <div class="filter-grid">
+        <label class="search-wrap" for="searchInput">
+          <span>Buscar</span>
+          <input id="searchInput" type="search" placeholder="Blusa, suplex, corset..." autocomplete="off" />
+        </label>
+        <label class="sort-wrap" for="sortSelect">
+          <span>Ordenar</span>
+          <select id="sortSelect">
+            <option value="featured">Destacados</option>
+            <option value="name">Nombre A-Z</option>
+          </select>
+        </label>
+        <div class="chip-row" id="categoryChips" aria-label="Categorías"></div>
+      </div>
+    </section>
+
+    <section class="section-block catalog-section" aria-label="Todos los productos">
+      <div id="productGrid" class="product-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="instagram-strip" id="contacto" aria-label="Instagram VYÓRE">
+      <div>
+        <p class="eyebrow">Instagram</p>
+        <h2>@vyore_pe</h2>
+      </div>
+      <a class="btn primary" href="https://www.instagram.com/vyore_pe?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">Visitar perfil</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <img src="assets/vyore/logo-vyore.png" alt="VYÓRE" />
+      <p>Blusas y tops femeninos con una estética limpia, elegante y moderna.</p>
+    </div>
+    <div class="footer-column">
+      <strong>Contacto</strong>
+      <a href="https://wa.me/51938807320" target="_blank" rel="noopener">+51 938 807 320</a>
+      <a href="https://wa.me/51937429389" target="_blank" rel="noopener">+51 937 429 389</a>
+      <a href="https://www.instagram.com/vyore_pe?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">@vyore_pe</a>
+    </div>
+    <div class="footer-column">
+      <strong>Compra</strong>
+      <span>Elige modelo y color.</span>
+      <span>Consulta disponibilidad por WhatsApp.</span>
+      <span>Pago validado por atención directa.</span>
+    </div>
+  </footer>
+
+  <template id="productTemplate">
+    <article class="product-card" tabindex="0">
+      <button class="product-image-button" type="button" aria-label="Ver modelo">
+        <img loading="lazy" alt="" />
+      </button>
+      <div class="product-body">
+        <span class="category"></span>
+        <h3></h3>
+      </div>
+    </article>
+  </template>
+
+  <template id="arrivalTemplate">
+    <article class="arrival-item">
+      <div class="arrival-media">
+        <img loading="lazy" alt="" />
+      </div>
+      <div>
+        <span></span>
+        <strong></strong>
+      </div>
+    </article>
+  </template>
+
+  <section class="product-modal" id="productModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalProductName">
+    <div class="modal-backdrop" data-close-modal></div>
+    <article class="product-detail">
+      <button class="modal-close" type="button" data-close-modal aria-label="Cerrar">×</button>
+      <div class="detail-media">
+        <img id="modalProductImage" alt="" />
+      </div>
+      <div class="detail-copy">
+        <p class="eyebrow" id="modalProductCategory">VYÓRE</p>
+        <h2 id="modalProductName"></h2>
+        <p class="detail-price" id="modalProductPrice"></p>
+        <p class="detail-fabric" id="modalProductFabric"></p>
+        <p class="detail-description" id="modalProductDescription"></p>
+        <dl class="detail-list">
+          <div><dt>Tallas</dt><dd id="modalProductSizes"></dd></div>
+          <div><dt>Detalle</dt><dd id="modalProductDetail"></dd></div>
+        </dl>
+        <div class="variant-block">
+          <span>Color</span>
+          <div id="modalVariantOptions" class="variant-options"></div>
+          <p id="modalStockLabel" class="stock-note"></p>
+        </div>
+        <button id="modalAddCart" type="button" class="btn primary full">Agregar al carrito</button>
+      </div>
+    </article>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="productos.js"></script>
+  <script src="catalog-utils.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+

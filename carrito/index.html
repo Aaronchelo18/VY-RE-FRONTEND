@@ -1,0 +1,80 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F3EDE4" />
+  <title>Carrito | VYÓRE</title>
+  <link rel="icon" href="../assets/vyore/isotipo-vyore.png" type="image/png" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../alerts.css" />
+  <link rel="stylesheet" href="cart.css" />
+</head>
+<body class="cart-page-body">
+  <header class="cart-page-header">
+    <a class="cart-brand" href="../" aria-label="Volver a VYÓRE">
+      <img src="../assets/vyore/logo-vyore.png" alt="VYÓRE" />
+    </a>
+    <nav class="cart-page-nav" aria-label="Carrito">
+      <a href="../#productos">Productos</a>
+    </nav>
+  </header>
+
+  <main class="cart-page">
+    <section class="cart-main" aria-labelledby="cartPageTitle">
+      <div class="cart-page-title">
+        <p class="eyebrow">Carrito</p>
+        <h1 id="cartPageTitle">Revisa tu pedido</h1>
+      </div>
+      <div id="cartPageItems" class="cart-table-shell" aria-live="polite"></div>
+    </section>
+
+    <aside class="checkout-summary" aria-labelledby="summaryTitle">
+      <h2 id="summaryTitle">Resumen</h2>
+      <div class="summary-lines">
+        <div>
+          <span>Subtotal</span>
+          <strong id="subtotalAmount">S/ 0.00</strong>
+        </div>
+        <div class="summary-total">
+          <span>Total</span>
+          <strong id="cartTotal">S/ 0.00</strong>
+        </div>
+      </div>
+      <p class="summary-note">La disponibilidad y el pago se confirman por WhatsApp.</p>
+      <a class="btn primary full" id="sendWhatsapp" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+      <a class="btn secondary full" href="../#productos">Elegir más productos</a>
+    </aside>
+  </main>
+
+  <template id="cartRowTemplate">
+    <article class="cart-product-row">
+      <div class="cart-product-detail">
+        <img class="cart-product-image" alt="" />
+        <div class="cart-product-info">
+          <span class="cart-product-sku"></span>
+          <h3></h3>
+          <p class="cart-product-variant"></p>
+          <p class="cart-product-state"></p>
+        </div>
+      </div>
+      <div class="cart-product-price"></div>
+      <div class="cart-product-qty">
+        <button type="button" class="qty-minus" aria-label="Disminuir cantidad">−</button>
+        <span class="qty-value"></span>
+        <button type="button" class="qty-plus" aria-label="Aumentar cantidad">+</button>
+      </div>
+      <div class="cart-product-subtotal"></div>
+      <button type="button" class="cart-product-remove" aria-label="Eliminar producto">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm1 6h2v9h-2V9Zm4 0h2v9h-2V9ZM7 9h2l.7 11h4.6L15 9h2l-.8 12a1 1 0 0 1-1 .9H8.8a1 1 0 0 1-1-.9L7 9Z"/></svg>
+      </button>
+    </article>
+  </template>
+
+  <script src="../productos.js"></script>
+  <script src="../catalog-utils.js"></script>
+  <script src="../alerts.js"></script>
+  <script src="cart.js"></script>
+</body>
+</html>
+

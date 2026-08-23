@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="theme-color" content="#682D42" />
+  <title>Admin | VY&Oacute;RE</title>
+  <link rel="icon" href="../assets/vyore/isotipo-vyore.png" type="image/png" />
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="css/sb-admin-2.min.css" />
+  <link rel="stylesheet" href="../alerts.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body id="page-top" class="login-mode">
+  <main class="admin-app">
+    <section class="login-visual" aria-hidden="true">
+      <div class="visual-frame">
+        <figure class="visual-product-card visual-product-main">
+          <img src="../assets/productos/vyore/catalogo/blusa-brodery-copa.png" alt="" />
+        </figure>
+        <figure class="visual-product-card visual-product-top">
+          <img src="../assets/productos/vyore/catalogo/suplex-corset.png" alt="" />
+        </figure>
+        <figure class="visual-product-card visual-product-bottom">
+          <img src="../assets/productos/vyore/catalogo/blusa-suplex-amarre.png" alt="" />
+        </figure>
+      </div>
+    </section>
+
+    <section class="login-panel" id="loginPanel" aria-labelledby="loginTitle">
+      <div class="login-brand">
+        <img src="../assets/vyore/logo-vyore.png" alt="VY&Oacute;RE" />
+        <span>Administraci&oacute;n</span>
+      </div>
+      <h1 id="loginTitle">Panel VY&Oacute;RE</h1>
+      <form id="loginForm" class="login-form">
+        <label for="adminUser">
+          <span>Usuario</span>
+          <input id="adminUser" name="user" type="text" autocomplete="username" required />
+        </label>
+        <label for="adminPassword">
+          <span>Clave</span>
+          <div class="password-control">
+            <input id="adminPassword" name="password" type="password" autocomplete="current-password" required />
+            <button id="togglePassword" class="password-toggle" type="button" aria-label="Mostrar contrasena" aria-pressed="false">
+              <i class="fas fa-eye" aria-hidden="true"></i>
+            </button>
+          </div>
+        </label>
+        <button class="primary-action" type="submit">Ingresar</button>
+        <p class="form-error" id="loginError" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="auth-panel" id="authPanel" aria-live="polite" hidden>
+      <img src="../assets/vyore/isotipo-vyore.png" alt="" />
+      <div class="auth-spinner" aria-hidden="true"></div>
+      <p class="eyebrow">Verificaci&oacute;n</p>
+      <h1>Comprobando acceso</h1>
+      <p id="authStatus">Validando usuario y permisos...</p>
+    </section>
+
+    <section class="admin-panel" id="adminPanel" hidden>
+      <div id="wrapper" class="vyore-admin-template">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+          <a class="sidebar-brand d-flex align-items-center justify-content-center" href="../" aria-label="Ver catalogo publico">
+            <span class="sidebar-brand-icon">
+              <img src="../assets/vyore/isotipo-vyore.png" alt="" />
+            </span>
+            <span class="sidebar-brand-text mx-3">VY&Oacute;RE</span>
+          </a>
+
+          <hr class="sidebar-divider my-0" />
+
+          <div class="sidebar-heading">Inventario</div>
+
+          <li class="nav-item active">
+            <button class="nav-link sidebar-link active" type="button" data-view="productos" aria-current="page" title="Productos">
+              <i class="fas fa-fw fa-th-large" aria-hidden="true"></i>
+              <span>Productos</span>
+            </button>
+          </li>
+
+          <li class="nav-item">
+            <button class="nav-link sidebar-link" type="button" data-view="ventas" title="Ventas">
+              <i class="fas fa-fw fa-receipt" aria-hidden="true"></i>
+              <span>Ventas</span>
+            </button>
+          </li>
+
+          <hr class="sidebar-divider d-none d-md-block" />
+
+          <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle" type="button" aria-label="Contraer menu" aria-expanded="true"></button>
+          </div>
+
+          <li class="nav-item mt-auto sidebar-logout-item">
+            <button id="logoutButton" class="nav-link logout-action" type="button" title="Cerrar sesion">
+              <i class="fas fa-fw fa-sign-out-alt" aria-hidden="true"></i>
+              <span>Cerrar sesion</span>
+            </button>
+          </li>
+        </ul>
+
+        <div id="content-wrapper" class="d-flex flex-column">
+          <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow-sm admin-topbar">
+              <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3" type="button" aria-label="Abrir menu">
+                <i class="fa fa-bars"></i>
+              </button>
+
+              <div class="topbar-title mr-auto ml-md-3">
+                <p class="eyebrow">Dashboard</p>
+                <h1 id="adminViewTitle">Productos</h1>
+                <p id="adminMeta">Actualizado: -- &middot; Stock: por confirmar</p>
+              </div>
+
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown no-arrow">
+                  <div class="nav-link admin-profile" aria-label="Usuario logueado">
+                    <span class="profile-avatar">
+                      <img id="profileImage" src="../assets/profile-admin.svg" alt="Perfil administrador" />
+                      <span id="profileInitial" aria-hidden="true">A</span>
+                    </span>
+                    <span class="profile-copy d-none d-sm-inline-block">
+                      <strong id="profileUser">admin</strong>
+                      <span id="profileRole">Administrador</span>
+                    </span>
+                  </div>
+                </li>
+              </ul>
+            </nav>
+
+            <div class="container-fluid vyore-admin-content">
+              <section class="admin-view active" id="productosView" data-view-panel="productos">
+                <section class="row summary-grid" aria-label="Resumen del catalogo">
+                  <div class="col-xl-3 col-md-6 mb-4">
+                    <article class="card summary-card border-left-wine shadow h-100 py-2">
+                      <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                          <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-wine text-uppercase mb-1">Productos</div>
+                            <strong id="totalProducts" class="h5 mb-0 font-weight-bold text-gray-900">0</strong>
+                          </div>
+                          <div class="col-auto"><i class="fas fa-tags fa-2x text-gray-300"></i></div>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                  <div class="col-xl-3 col-md-6 mb-4">
+                    <article class="card summary-card border-left-ink shadow h-100 py-2">
+                      <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                          <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-ink text-uppercase mb-1">Con stock</div>
+                            <strong id="withStock" class="h5 mb-0 font-weight-bold text-gray-900">0</strong>
+                          </div>
+                          <div class="col-auto"><i class="fas fa-check-circle fa-2x text-gray-300"></i></div>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                  <div class="col-xl-3 col-md-6 mb-4">
+                    <article class="card summary-card border-left-alert shadow h-100 py-2">
+                      <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                          <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-alert text-uppercase mb-1">Agotados</div>
+                            <strong id="soldOut" class="h5 mb-0 font-weight-bold text-gray-900">0</strong>
+                          </div>
+                          <div class="col-auto"><i class="fas fa-exclamation-circle fa-2x text-gray-300"></i></div>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                  <div class="col-xl-3 col-md-6 mb-4">
+                    <article class="card summary-card border-left-gold shadow h-100 py-2">
+                      <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                          <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-gold text-uppercase mb-1">Categorias</div>
+                            <strong id="categoryCount" class="h5 mb-0 font-weight-bold text-gray-900">0</strong>
+                          </div>
+                          <div class="col-auto"><i class="fas fa-layer-group fa-2x text-gray-300"></i></div>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+
+                <section class="card admin-card shadow mb-4 product-create-panel" aria-labelledby="addProductTitle">
+                  <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                    <h2 id="addProductTitle" class="h6 m-0 font-weight-bold text-wine">Agregar prenda</h2>
+                    <button id="clearProductForm" class="secondary-action" type="button">Limpiar</button>
+                  </div>
+                  <div class="card-body">
+                    <form id="productForm" class="product-form">
+                      <div class="form-row">
+                        <label class="form-group col-xl-1 col-md-3" for="newProductSku">
+                          <span>SKU</span>
+                          <input class="form-control" id="newProductSku" name="sku" type="text" placeholder="VYO-009" autocomplete="off" />
+                        </label>
+                        <label class="form-group col-xl-5 col-md-9" for="newProductName">
+                          <span>Producto</span>
+                          <input class="form-control" id="newProductName" name="nombre" type="text" autocomplete="off" required />
+                        </label>
+                        <label class="form-group col-xl-3 col-md-6" for="newProductColor">
+                          <span>Color</span>
+                          <input class="form-control" id="newProductColor" name="colorName" type="text" autocomplete="off" />
+                        </label>
+                        <label class="form-group col-xl-3 col-md-6" for="newProductColorHex">
+                          <span>Hex color</span>
+                          <input class="form-control" id="newProductColorHex" name="colorHex" type="text" placeholder="#817A75" autocomplete="off" />
+                        </label>
+                      </div>
+                      <div class="form-row">
+                        <label class="form-group col-xl-1 col-md-3" for="newProductCategory">
+                          <span>Categoria</span>
+                          <select class="form-control" id="newProductCategory" name="categoria" required></select>
+                        </label>
+                        <label class="form-group col-xl-3 col-md-4" for="newProductPublic">
+                          <span>Precio publico</span>
+                          <input class="form-control" id="newProductPublic" name="precioPublico" type="number" min="0" step="0.10" required />
+                        </label>
+                        <label class="form-group col-xl-3 col-md-4" for="newProductStudent">
+                          <span>Precio regular</span>
+                          <input class="form-control" id="newProductStudent" name="precioRegular" type="number" min="0" step="0.10" />
+                        </label>
+                        <label class="form-group col-xl-2 col-md-4" for="newProductStock">
+                          <span>Stock</span>
+                          <input class="form-control" id="newProductStock" name="stock" type="number" min="0" placeholder="--" />
+                        </label>
+                        <label class="form-group col-xl-3 col-md-5" for="newProductStatus">
+                          <span>Estado</span>
+                          <select class="form-control" id="newProductStatus" name="disponibilidad">
+                            <option value="consultar">Consultar</option>
+                            <option value="disponible">Disponible</option>
+                            <option value="bajo">Bajo stock</option>
+                            <option value="agotado">Agotado</option>
+                          </select>
+                        </label>
+                      </div>
+                      <div class="form-row align-items-end">
+                        <label class="form-group col-xl-5 col-md-8" for="newProductImage">
+                          <span>Imagen</span>
+                          <input class="form-control" id="newProductImage" name="imagen" type="text" placeholder="assets/productos/vyore/catalogo/nueva-prenda.jpg" autocomplete="off" />
+                        </label>
+                        <label class="checkbox-field form-group col-xl-2 col-md-4" for="newProductFeatured">
+                          <input id="newProductFeatured" name="destacado" type="checkbox" />
+                          <span>Destacado</span>
+                        </label>
+                        <div class="form-group col-xl-3 col-md-6 ml-auto">
+                          <button class="primary-action add-product-action w-100" type="submit">Agregar producto</button>
+                        </div>
+                      </div>
+                    </form>
+                    <datalist id="categoryOptions"></datalist>
+                  </div>
+                </section>
+
+                <section class="card admin-card shadow mb-4 admin-toolbar" aria-label="Acciones de administracion">
+                  <div class="card-body">
+                    <div class="form-row align-items-end">
+                      <label class="form-group col-xl-9 col-lg-8 mb-lg-0" for="adminSearch">
+                        <span>Buscar</span>
+                        <input class="form-control" id="adminSearch" type="search" placeholder="SKU, nombre o categoria" autocomplete="off" />
+                      </label>
+                      <div class="form-group col-xl-3 col-lg-4 mb-0 toolbar-actions">
+                        <button id="saveProducts" class="primary-action" type="button">Guardar cambios</button>
+                        <button id="exportExcel" class="secondary-action" type="button">Exportar Excel</button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="card admin-card shadow mb-4 table-shell" aria-label="Productos editables">
+                  <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                    <h2 class="h6 m-0 font-weight-bold text-wine">Inventario editable</h2>
+                    <span class="small text-muted">Cada fila representa una prenda/color independiente</span>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-hover admin-product-table mb-0">
+                        <thead>
+                          <tr>
+                            <th>SKU</th>
+                            <th>Imagen</th>
+                            <th>Producto</th>
+                            <th>Color</th>
+                            <th>Categoria</th>
+                            <th>Publico</th>
+                            <th>Regular</th>
+                            <th>Stock</th>
+                            <th>Estado</th>
+                            <th>Destacado</th>
+                          </tr>
+                        </thead>
+                        <tbody id="productRows"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </section>
+              </section>
+
+              <section class="admin-view" id="ventasView" data-view-panel="ventas" hidden>
+                <section class="card admin-card shadow mb-4 sales-panel">
+                  <div class="card-header py-3">
+                    <p class="eyebrow mb-1">Ventas</p>
+                    <h2 class="h6 m-0 font-weight-bold text-wine">Pedidos por registrar</h2>
+                  </div>
+                  <div class="card-body">
+                    <div class="sales-empty">
+                      <i class="fas fa-receipt" aria-hidden="true"></i>
+                      <strong>Sin ventas guardadas</strong>
+                      <span>Cuando exista backend, aqui se podra consultar pedidos, clientes y comprobantes.</span>
+                    </div>
+                  </div>
+                </section>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../productos.js"></script>
+  <script src="../catalog-utils.js"></script>
+  <script src="../alerts.js"></script>
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+  <script src="js/sb-admin-2.min.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
