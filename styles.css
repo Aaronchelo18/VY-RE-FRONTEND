@@ -875,3 +875,261 @@ a.disabled {
 @media (max-width: 380px) {
   .featured-grid { grid-template-columns: 1fr; }
 }
+/* Mobile storefront pass */
+@media (max-width: 700px) {
+  body {
+    background: var(--cream);
+  }
+
+  .topbar {
+    min-height: 74px;
+    padding: 10px 18px;
+    border-bottom-color: var(--line);
+    background: rgba(250, 247, 242, .96);
+  }
+
+  .brand,
+  .brand img {
+    width: 108px;
+  }
+
+  .menu-toggle {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cart-nav {
+    min-height: 38px;
+    padding: 7px 9px;
+    background: rgba(255, 255, 255, .74);
+  }
+
+  .main-nav {
+    top: 84px;
+    left: 18px;
+    right: 18px;
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .main-nav a {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    padding: 0 16px;
+  }
+
+  .main-nav a:hover {
+    background: rgba(104, 45, 66, .08);
+  }
+
+  .hero {
+    display: block;
+    min-height: 0;
+    padding: 92px 18px 42px;
+    background: var(--beige);
+  }
+
+  .hero-media {
+    position: relative;
+    inset: auto;
+    height: min(82vw, 360px);
+    margin: 0 -18px 28px;
+    background:
+      radial-gradient(circle at 78% 16%, rgba(255, 255, 255, .86), rgba(255, 255, 255, 0) 34%),
+      linear-gradient(180deg, rgba(250, 247, 242, .16), rgba(243, 237, 228, .92)),
+      url("assets/productos/vyore/catalogo/suplex-amarre-hebilla.png") center 22px / auto 88% no-repeat;
+    transform: none;
+  }
+
+  .hero-content {
+    color: var(--black);
+  }
+
+  .hero .eyebrow {
+    color: var(--wine);
+  }
+
+  .hero h1 {
+    font-size: clamp(3.2rem, 17vw, 4.9rem);
+    line-height: .92;
+  }
+
+  .hero-text {
+    max-width: 14em;
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: clamp(1.25rem, 6vw, 1.75rem);
+  }
+
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .hero-actions .btn {
+    min-width: 0;
+    padding-inline: 12px;
+  }
+
+  .hero-actions .btn.subtle {
+    border-color: var(--soft-line);
+    background: rgba(255, 255, 255, .48);
+    color: var(--wine);
+  }
+
+  .section-block,
+  .catalog-toolbar,
+  .brand-story,
+  .instagram-strip,
+  .site-footer {
+    width: min(100% - 32px, var(--container));
+  }
+
+  .section-block {
+    padding-top: 44px;
+  }
+
+  .section-heading {
+    margin-bottom: 18px;
+  }
+
+  .section-heading h2,
+  .brand-story h2,
+  .instagram-strip h2 {
+    font-size: clamp(2.15rem, 11vw, 3.2rem);
+    line-height: 1.04;
+  }
+
+  .featured-grid,
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px 14px;
+  }
+
+  .featured-grid {
+    justify-content: stretch;
+  }
+
+  .product-image-button {
+    aspect-ratio: 3 / 4;
+  }
+
+  .product-card h3 {
+    min-height: 0;
+    font-size: 1.02rem;
+    line-height: 1.18;
+  }
+
+  .product-body {
+    padding-top: 10px;
+  }
+
+  .compact-band {
+    margin-top: 46px;
+    padding: 42px 16px 46px;
+  }
+
+  .new-arrivals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+  }
+
+  .arrival-media {
+    aspect-ratio: 1 / 1.08;
+  }
+
+  .arrival-item--fit .arrival-media img {
+    padding: 0 12px 22px;
+  }
+
+  .brand-story {
+    gap: 24px;
+    padding: 56px 0 34px;
+  }
+
+  .story-copy p:last-child {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .story-mark {
+    min-height: 220px;
+    border-radius: 8px;
+  }
+
+  .story-mark img {
+    width: auto;
+    max-width: 54%;
+    max-height: 150px;
+  }
+
+  .catalog-toolbar {
+    padding-top: 36px;
+  }
+
+  .chip-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+  }
+
+  .chip-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chip {
+    flex: 0 0 auto;
+  }
+
+  .instagram-strip {
+    padding: 30px 0;
+  }
+
+  .instagram-strip .btn {
+    width: 100%;
+  }
+
+  .site-footer {
+    padding: 34px 0 42px;
+  }
+}
+
+@media (max-width: 430px) {
+  .topbar {
+    padding-inline: 14px;
+  }
+
+  .brand,
+  .brand img {
+    width: 96px;
+  }
+
+  .hero {
+    padding-inline: 16px;
+  }
+
+  .hero-media {
+    height: min(92vw, 330px);
+    margin-inline: -16px;
+  }
+
+  .hero-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .featured-grid,
+  .product-grid,
+  .new-arrivals {
+    gap-inline: 12px;
+  }
+
+  .arrival-item strong,
+  .product-card h3 {
+    font-size: .96rem;
+  }
+}
