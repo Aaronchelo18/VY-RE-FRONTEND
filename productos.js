@@ -142,8 +142,8 @@ window.PRODUCTOS_VYORE = [
         "active": true
       },
       {
-        "id": "rosado",
-        "colorName": "Rosado",
+        "id": "marron-claro",
+        "colorName": "Marrón claro",
         "colorHex": "#B8756A",
         "image": "assets/productos/vyore/variantes/olimpico-suplex/olimpico-suplex-06-rosado.png",
         "stock": null,
@@ -274,9 +274,9 @@ window.PRODUCTOS_VYORE = [
         "active": true
       },
       {
-        "id": "chocolate",
-        "colorName": "Chocolate",
-        "colorHex": "#4F372C",
+        "id": "negro",
+        "colorName": "Negro",
+        "colorHex": "#111111",
         "image": "assets/productos/vyore/variantes/suplex-corset/suplex-corset-03-chocolate.png",
         "stock": null,
         "active": true
@@ -537,9 +537,9 @@ window.PRODUCTOS_VYORE = [
         "active": true
       },
       {
-        "id": "beige",
-        "colorName": "Beige",
-        "colorHex": "#CBB9A4",
+        "id": "amarillo",
+        "colorName": "Amarillo",
+        "colorHex": "#F3D85D",
         "image": "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-02-beige.png",
         "stock": null,
         "active": true

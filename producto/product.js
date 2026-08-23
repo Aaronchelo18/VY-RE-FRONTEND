@@ -32,6 +32,7 @@ const variantStock = document.querySelector("#variantStock");
 const addToCartButton = document.querySelector("#addToCart");
 const sendWhatsapp = document.querySelector("#sendWhatsapp");
 const toast = document.querySelector("#toast");
+const productHeaderCartCount = document.querySelector("#productHeaderCartCount");
 
 function normalize(text) {
   return String(text ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
@@ -64,12 +65,13 @@ function migrateBlusaSuplexAmarreVariant(variant = {}, product = {}, image = "")
 
   const originalId = String(variant.id || "");
   const originalName = String(variant.colorName || variant.nombre || "");
+  const isAmarillo = originalId === "beige" || originalName === "Beige" || /blusa-suplex-amarre-02-beige\.(jpg|png)$/.test(currentImage);
   const isRosado = originalId === "marron" || originalName === "Marrón" || /blusa-suplex-amarre-03-(marron|rosado)\.(jpg|png)$/.test(currentImage);
   return {
     ...variant,
-    id: isRosado ? "rosado" : variant.id,
-    colorName: isRosado ? "Rosado" : variant.colorName,
-    colorHex: isRosado ? "#C98A9B" : variant.colorHex,
+    id: isAmarillo ? "amarillo" : isRosado ? "rosado" : variant.id,
+    colorName: isAmarillo ? "Amarillo" : isRosado ? "Rosado" : variant.colorName,
+    colorHex: isAmarillo ? "#F3D85D" : isRosado ? "#C98A9B" : variant.colorHex,
     image: isRosado && !nextImage ? "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-03-rosado.png" : nextImage,
   };
 }
@@ -117,7 +119,8 @@ function migrateBlusaSuplexProduct(product = {}) {
   const findStoredVariant = (target) => sourceVariants.find((variant) => {
     const id = normalize(variant.id || "");
     const name = normalize(variant.colorName || variant.nombre || "");
-    return id === target.id || name === target.id;
+    const aliases = [target.id, target.colorName, ...(target.legacyIds || [])].map(normalize);
+    return aliases.includes(id) || aliases.includes(name);
   });
 
   return {
@@ -265,10 +268,11 @@ function migrateOlimpicoSuplexProduct(product = {}) {
       active: true,
     },
     {
-      id: "rosado",
-      colorName: "Rosado",
+      id: "marron-claro",
+      colorName: "Marrón claro",
       colorHex: "#B8756A",
       image: "assets/productos/vyore/variantes/olimpico-suplex/olimpico-suplex-06-rosado.png",
+      legacyIds: ["rosado"],
       stock: null,
       active: true,
     },
@@ -294,7 +298,8 @@ function migrateOlimpicoSuplexProduct(product = {}) {
   const findStoredVariant = (target) => sourceVariants.find((variant) => {
     const id = normalize(variant.id || "");
     const name = normalize(variant.colorName || variant.nombre || "");
-    return id === target.id || name === target.id;
+    const aliases = [target.id, target.colorName, ...(target.legacyIds || [])].map(normalize);
+    return aliases.includes(id) || aliases.includes(name);
   });
 
   return {
@@ -397,6 +402,18 @@ function loadCart() {
 }
 function saveCart(cart) {
   localStorage.setItem(STORAGE_KEYS.cart, JSON.stringify(cart));
+}
+function cartTotalQuantity() {
+  return Object.values(loadCart()).reduce((sum, record) => {
+    const quantity = typeof record === "number" ? record : record?.quantity ?? record?.cantidad ?? 0;
+    return sum + Math.max(0, Math.floor(Number(quantity) || 0));
+  }, 0);
+}
+function renderHeaderCartCount() {
+  if (!productHeaderCartCount) return;
+  const count = cartTotalQuantity();
+  productHeaderCartCount.textContent = count;
+  productHeaderCartCount.classList.toggle("is-empty", count === 0);
 }
 function cartQuantityFor(variant) {
   const cart = loadCart();
@@ -512,6 +529,7 @@ if (!product) {
   detail.textContent = product.detalle;
   renderVariants();
   syncVariant();
+  renderHeaderCartCount();
 }
 
 addToCartButton.addEventListener("click", () => {
@@ -538,6 +556,6 @@ addToCartButton.addEventListener("click", () => {
     quantity: stock === null ? next : Math.min(next, stock),
   };
   saveCart(cart);
-  showToast("Prenda agregada al carrito");
+  renderHeaderCartCount();
   syncVariant();
 });

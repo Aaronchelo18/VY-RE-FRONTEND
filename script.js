@@ -8,6 +8,7 @@ const BASE_PRODUCTS = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_V
 let SKU_PRODUCTS = buildSkuProducts();
 let PRODUCTS = buildProducts();
 const FIT_ARRIVAL_SLUGS = new Set(["suplex-corset", "suplex-doble-forro"]);
+const ARRIVAL_LIMIT = 3;
 const PRODUCT_CARD_SHRINK_SLUGS = new Set(["blusa-suplex-amarre", "suplex-corset", "suplex-doble-forro"]);
 
 const state = {
@@ -115,12 +116,13 @@ function migrateBlusaSuplexAmarreVariant(variant = {}, product = {}, image = "")
 
   const originalId = String(variant.id || "");
   const originalName = String(variant.colorName || variant.nombre || "");
+  const isAmarillo = originalId === "beige" || originalName === "Beige" || /blusa-suplex-amarre-02-beige\.(jpg|png)$/.test(currentImage);
   const isRosado = originalId === "marron" || originalName === "Marrón" || /blusa-suplex-amarre-03-(marron|rosado)\.(jpg|png)$/.test(currentImage);
   return {
     ...variant,
-    id: isRosado ? "rosado" : variant.id,
-    colorName: isRosado ? "Rosado" : variant.colorName,
-    colorHex: isRosado ? "#C98A9B" : variant.colorHex,
+    id: isAmarillo ? "amarillo" : isRosado ? "rosado" : variant.id,
+    colorName: isAmarillo ? "Amarillo" : isRosado ? "Rosado" : variant.colorName,
+    colorHex: isAmarillo ? "#F3D85D" : isRosado ? "#C98A9B" : variant.colorHex,
     image: isRosado && !nextImage ? "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-03-rosado.png" : nextImage,
   };
 }
@@ -168,7 +170,8 @@ function migrateBlusaSuplexProduct(product = {}) {
   const findStoredVariant = (target) => sourceVariants.find((variant) => {
     const id = normalize(variant.id || "");
     const name = normalize(variant.colorName || variant.nombre || "");
-    return id === target.id || name === target.id;
+    const aliases = [target.id, target.colorName, ...(target.legacyIds || [])].map(normalize);
+    return aliases.includes(id) || aliases.includes(name);
   });
 
   return {
@@ -316,10 +319,11 @@ function migrateOlimpicoSuplexProduct(product = {}) {
       active: true,
     },
     {
-      id: "rosado",
-      colorName: "Rosado",
+      id: "marron-claro",
+      colorName: "Marrón claro",
       colorHex: "#B8756A",
       image: "assets/productos/vyore/variantes/olimpico-suplex/olimpico-suplex-06-rosado.png",
+      legacyIds: ["rosado"],
       stock: null,
       active: true,
     },
@@ -345,7 +349,8 @@ function migrateOlimpicoSuplexProduct(product = {}) {
   const findStoredVariant = (target) => sourceVariants.find((variant) => {
     const id = normalize(variant.id || "");
     const name = normalize(variant.colorName || variant.nombre || "");
-    return id === target.id || name === target.id;
+    const aliases = [target.id, target.colorName, ...(target.legacyIds || [])].map(normalize);
+    return aliases.includes(id) || aliases.includes(name);
   });
 
   return {
@@ -627,9 +632,18 @@ function renderFeatured() {
     .forEach((product) => featuredGrid.appendChild(productCard(featuredProductFromSku(product))));
 }
 
+function randomArrivalProducts() {
+  return PRODUCTS
+    .filter((product) => product.newArrival)
+    .map((product) => ({ product, order: Math.random() }))
+    .sort((a, b) => a.order - b.order)
+    .slice(0, ARRIVAL_LIMIT)
+    .map((item) => item.product);
+}
+
 function renderArrivals() {
   newGrid.innerHTML = "";
-  PRODUCTS.filter((product) => product.newArrival).slice(0, 6).forEach((product) => {
+  randomArrivalProducts().forEach((product) => {
     const node = arrivalTemplate.content.firstElementChild.cloneNode(true);
     const productSlug = product.slug || product.id;
     node.dataset.productSlug = productSlug;
@@ -834,7 +848,7 @@ modalAddCart.addEventListener("click", () => {
     return;
   }
   syncModalVariant(result.product, result.variant.id);
-  showToast(`${result.product.nombre} agregado al carrito`);
+  closeProduct();
 });
 
 document.addEventListener("keydown", (event) => {
