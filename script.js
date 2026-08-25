@@ -638,14 +638,13 @@ function renderProducts() {
 
 function renderFeatured() {
   featuredGrid.innerHTML = "";
-  SKU_PRODUCTS
+  PRODUCTS
     .filter((product) => product.featured && canShowFeaturedSku(product))
     .sort((a, b) =>
       (a.sortOrder ?? 99) - (b.sortOrder ?? 99) ||
-      (a.modelName || a.nombre).localeCompare(b.modelName || b.nombre, "es") ||
-      (a.colorName || "").localeCompare(b.colorName || "", "es")
+      (a.nombre || a.modelName || "").localeCompare(b.nombre || b.modelName || "", "es")
     )
-    .forEach((product) => featuredGrid.appendChild(productCard(featuredProductFromSku(product))));
+    .forEach((product) => featuredGrid.appendChild(productCard(product)));
 }
 
 function baseDisplayProducts() {
