@@ -10,6 +10,7 @@ let PRODUCTS = buildProducts();
 const FIT_ARRIVAL_SLUGS = new Set(["suplex-corset", "suplex-doble-forro"]);
 const ARRIVAL_LIMIT = 3;
 const PRODUCT_CARD_SHRINK_SLUGS = new Set(["blusa-suplex-amarre", "suplex-corset", "suplex-doble-forro"]);
+const REFERENCE_IMAGE_DIR = "assets/productos/vyore/variantes/IMAGENES-REFERENCIALES";
 
 const state = {
   category: "Todos",
@@ -63,6 +64,17 @@ function normalize(text) {
     .trim();
 }
 
+function referenceImageFor(product = {}) {
+  const id = product.modelSlug || product.slug || product.modelId || product.id || product.nombre;
+  if (product.referenceImage) return product.referenceImage;
+  if (window.VyoreCatalog?.referenceImageFor) return window.VyoreCatalog.referenceImageFor(id) || product.mainImage || product.imagen;
+  return id ? `${REFERENCE_IMAGE_DIR}/${slugify(id)}.png` : product.mainImage || product.imagen;
+}
+
+function displayImage(product = {}) {
+  return referenceImageFor(product) || product.mainImage || product.imagen || "assets/vyore/isotipo-vyore.png";
+}
+
 function toNumber(value, fallback = 0) {
   if (value === null || value === undefined || value === "") return fallback;
   const parsed = Number(String(value).replace(",", "."));
@@ -107,10 +119,10 @@ function migrateBlusaSuplexAmarreVariant(variant = {}, product = {}, image = "")
   const isTarget = productId === "blusa-suplex-amarre" || currentImage.includes("blusa-suplex-amarre");
   if (!isTarget) return { ...variant, image };
 
-  const match = currentImage.match(/blusa-suplex-amarre-(0[1-6])-(azul|beige|marron|rosado|rojo|verde|negro)\.(jpg|png)$/);
+  const match = currentImage.match(/blusa-suplex-amarre-(0[1-6])-(azul|beige|amarillo|marron|rosado|rojo|verde|negro)\.(jpg|png)$/);
   let nextImage = currentImage;
   if (match) {
-    const color = match[2] === "marron" ? "rosado" : match[2];
+    const color = match[2] === "marron" ? "rosado" : match[2] === "beige" ? "amarillo" : match[2];
     nextImage = `assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-${match[1]}-${color}.png`;
   }
 
@@ -130,7 +142,7 @@ function migrateBlusaSuplexProduct(product = {}) {
   const productId = String(product.id || product.slug || "");
   if (productId !== "blusa-suplex") return product;
 
-  const mainImage = "assets/productos/vyore/catalogo/blusa-suplex.png";
+  const mainImage = "assets/productos/vyore/variantes/IMAGENES-REFERENCIALES/blusa-suplex.png";
   const variants = [
     {
       id: "blanco",
@@ -196,7 +208,7 @@ function migrateSuplexLazzoDobleForroProduct(product = {}) {
   const productId = String(product.id || product.slug || "");
   if (productId !== "suplex-lazzo-doble-forro") return product;
 
-  const mainImage = "assets/productos/vyore/catalogo/suplex-lazzo-doble-forro.png";
+  const mainImage = "assets/productos/vyore/variantes/IMAGENES-REFERENCIALES/suplex-lazzo-doble-forro.png";
   const variants = [
     {
       id: "marron",
@@ -284,7 +296,7 @@ function migrateOlimpicoSuplexProduct(product = {}) {
   const productId = String(product.id || product.slug || "");
   if (productId !== "olimpico-suplex") return product;
 
-  const mainImage = "assets/productos/vyore/olimpico-suplex.png";
+  const mainImage = `${REFERENCE_IMAGE_DIR}/olimpico-suplex.png`;
   const variants = [
     {
       id: "marron",
@@ -405,6 +417,7 @@ function normalizeProduct(product) {
     precioPublico: price,
     mainImage: product.mainImage || product.imagen || product.image || "assets/vyore/isotipo-vyore.png",
     imagen: product.imagen || product.mainImage || product.image || "assets/vyore/isotipo-vyore.png",
+    referenceImage: product.referenceImage || referenceImageFor(product),
     featured: isFeatured,
     destacado: isFeatured,
     newArrival: Boolean(product.newArrival ?? product.nuevo),
@@ -472,12 +485,13 @@ function getProductBySlug(slug) {
 }
 
 function getVariant(product, variantId) {
-  return product?.variantes.find((variant) => variant.id === variantId) || product?.variantes[0] || null;
+  if (!product || !variantId) return null;
+  return product.variantes.find((variant) => variant.id === variantId || variant.colorId === variantId || variant.sku === variantId) || null;
 }
 
 function variantAvailability(variant) {
   const stock = parseStock(variant?.stock);
-  if (!variant || variant.active === false || stock === 0) return { key: "agotado", label: "Agotado", canBuy: false };
+  if (!variant || variant.active === false || variant.disponibilidad === "agotado" || stock === 0) return { key: "agotado", label: "Agotado", canBuy: false };
   if (stock !== null) return { key: stock <= 2 ? "bajo" : "disponible", label: `${stock} disponible${stock === 1 ? "" : "s"}`, canBuy: true };
   return { key: "disponible", label: "Disponible", canBuy: true };
 }
@@ -555,6 +569,7 @@ function canShowFeaturedSku(product = {}) {
 function featuredProductFromSku(product) {
   const group = PRODUCTS.find((item) => item.id === product.modelId || item.slug === product.modelSlug) || product;
   const image = product.imagen || product.mainImage || group.mainImage || group.imagen;
+  const referenceImage = group.referenceImage || product.referenceImage || referenceImageFor(group) || referenceImageFor(product);
   return {
     ...group,
     sku: product.sku,
@@ -567,10 +582,11 @@ function featuredProductFromSku(product) {
     featuredVariantId: product.colorId,
     featuredSku: product.sku,
     featuredImage: image,
+    referenceImage,
   };
 }
 
-function productUrl(product, variantId = product.featuredVariantId || null) {
+function productUrl(product, variantId = null) {
   const url = new URL("producto/", window.location.href);
   url.searchParams.set("slug", product.slug || product.id);
   if (variantId) url.searchParams.set("color", variantId);
@@ -587,7 +603,7 @@ function productCard(product) {
   const img = node.querySelector("img");
   const open = () => { window.location.href = productUrl(product); };
 
-  img.src = product.mainImage || product.imagen;
+  img.src = displayImage(product);
   img.alt = product.nombre;
   imageButton.setAttribute("aria-label", `Ver ${product.nombre}`);
   node.querySelector(".category").textContent = product.categoria;
@@ -632,24 +648,32 @@ function renderFeatured() {
     .forEach((product) => featuredGrid.appendChild(productCard(featuredProductFromSku(product))));
 }
 
-function randomArrivalProducts() {
-  return PRODUCTS
+function baseDisplayProducts() {
+  return BASE_PRODUCTS
+    .map((product) => normalizeProduct(product))
+    .filter((product) => product.active !== false);
+}
+
+function arrivalProducts() {
+  return baseDisplayProducts()
     .filter((product) => product.newArrival)
-    .map((product) => ({ product, order: Math.random() }))
-    .sort((a, b) => a.order - b.order)
-    .slice(0, ARRIVAL_LIMIT)
-    .map((item) => item.product);
+    .sort((a, b) =>
+      (a.sortOrder ?? 99) - (b.sortOrder ?? 99) ||
+      Number(b.featured) - Number(a.featured) ||
+      a.nombre.localeCompare(b.nombre, "es")
+    )
+    .slice(0, ARRIVAL_LIMIT);
 }
 
 function renderArrivals() {
   newGrid.innerHTML = "";
-  randomArrivalProducts().forEach((product) => {
+  arrivalProducts().forEach((product) => {
     const node = arrivalTemplate.content.firstElementChild.cloneNode(true);
     const productSlug = product.slug || product.id;
     node.dataset.productSlug = productSlug;
     if (FIT_ARRIVAL_SLUGS.has(productSlug)) node.classList.add("arrival-item--fit");
     const image = node.querySelector("img");
-    image.src = product.mainImage || product.imagen;
+    image.src = displayImage(product);
     image.alt = product.nombre;
     node.querySelector("span").textContent = product.categoria;
     node.querySelector("strong").textContent = product.nombre;
@@ -732,7 +756,9 @@ function openProduct(productId, variantId = null) {
   const product = getProduct(productId);
   if (!product) return;
   const firstAvailable = product.variantes.find((variant) => variantAvailability(variant).canBuy) || product.variantes[0];
-  const variant = getVariant(product, variantId) || firstAvailable;
+  const requestedVariant = getVariant(product, variantId);
+  const variant = requestedVariant && variantAvailability(requestedVariant).canBuy ? requestedVariant : firstAvailable;
+  if (!variant) return;
   state.selectedProductId = product.id;
   state.selectedVariantId = variant.id;
 

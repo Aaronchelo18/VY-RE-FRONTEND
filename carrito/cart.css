@@ -1,4 +1,4 @@
-﻿.cart-page-body {
+.cart-page-body {
   min-height: 100vh;
   background: var(--beige);
 }
@@ -241,4 +241,18 @@
   .cart-product-qty { grid-column: 1; justify-self: start; }
   .cart-product-subtotal { grid-column: 1; text-align: left; }
   .cart-product-remove { grid-column: 2; grid-row: 2 / span 3; }
+}
+/* VYORE cart image correction */
+.cart-product-image {
+  box-sizing: border-box;
+  background: #F3EDE4;
+  object-fit: contain;
+  padding: 6px;
+}
+
+.cart-page-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, .54);
 }

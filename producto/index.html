@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
@@ -11,24 +11,37 @@
 </head>
 <body class="product-page-body">
   <header class="product-page-header">
-    <a class="product-page-brand" href="../" aria-label="Volver a VYÓRE">
-      <img src="../assets/vyore/logo-vyore.png" alt="VYÓRE" />
-    </a>
-    <nav class="product-page-nav" aria-label="Producto">
-      <a class="product-nav-icon" href="../#productos" aria-label="Productos">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z" /></svg>
+    <nav class="topbar product-topbar" aria-label="Navegación principal">
+      <button class="menu-toggle" type="button" id="productMenuToggle" aria-label="Abrir menú" aria-controls="productMainNav" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <a class="brand product-page-brand" href="../" aria-label="Volver a VYÓRE">
+        <img src="../assets/vyore/logo-vyore.png" alt="VYÓRE" />
       </a>
-      <a class="product-nav-icon product-nav-cart" href="../carrito/" aria-label="Carrito">
+      <div class="main-nav product-main-nav" id="productMainNav">
+        <a href="../">Inicio</a>
+        <a href="../#productos">Productos</a>
+        <a href="../#nuevos">Nuevos ingresos</a>
+        <a href="../#vyore">VYÓRE</a>
+        <a href="../#contacto">Contacto</a>
+      </div>
+      <a class="cart-nav product-header-cart" href="../carrito/" aria-label="Carrito">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 18a2 2 0 1 0 .01 0H7Zm10 0a2 2 0 1 0 .01 0H17ZM4.2 4l1.5 9.2A3 3 0 0 0 8.7 16h7.8a3 3 0 0 0 2.9-2.3l1.1-5.2H7.1L6.7 6H3V4h1.2Z" /></svg>
         <strong id="productHeaderCartCount">0</strong>
       </a>
     </nav>
+    <div class="menu-backdrop product-menu-backdrop" id="productMenuBackdrop"></div>
   </header>
 
   <main class="product-page" data-product-page>
-    <section class="product-gallery" aria-label="Imagen de producto">
-      <img id="productImage" alt="" />
-    </section>
+    <div class="product-visual">
+      <a class="product-gallery-back" href="../#productos" aria-label="Volver a productos">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 18 9 12l6-6" /></svg>
+      </a>
+      <section class="product-gallery" aria-label="Imagen de producto">
+        <img id="productImage" alt="" />
+      </section>
+    </div>
 
     <section class="product-info" aria-labelledby="productName">
       <p class="eyebrow" id="productCategory">VYÓRE</p>
@@ -54,7 +67,6 @@
         <a id="sendWhatsapp" class="btn primary" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
         <button id="addToCart" class="btn secondary" type="button">Agregar al carrito</button>
       </div>
-      <a class="back-link" href="../#productos">Volver a productos</a>
     </section>
   </main>
 

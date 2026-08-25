@@ -16,7 +16,12 @@ const AUTH_USERS = [
 
 const baseMeta = window.VYORE_CATALOG_META || {};
 const baseProducts = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : [];
-let products = window.VyoreCatalog ? window.VyoreCatalog.mergeCatalog(baseProducts, loadStoredProducts()) : mergeProducts(baseProducts.map(normalizeProduct), loadStoredProducts());
+const baseCatalogProducts = cleanProductList(mergeCatalogRecords(baseProducts, []), { includeInactive: true });
+const baseProductKeys = new Set(baseCatalogProducts.map(productIdentityKey));
+sanitizeStoredProducts();
+let deletedProducts = loadDeletedProducts();
+let products = loadAdminCatalog();
+let rowSnapshots = new Map();
 let search = "";
 let dirty = false;
 let activeView = "productos";
@@ -364,15 +369,65 @@ function loadStoredMeta() {
   }
 }
 
-function mergeProducts(base, stored) {
+function expandAdminRecord(record = {}) {
+  if (!record || typeof record !== "object") return [];
+  if (window.VyoreCatalog?.expandRecord) return window.VyoreCatalog.expandRecord(record);
+  return [normalizeProduct(record)];
+}
+
+function productIdentityKey(product = {}) {
+  const normalized = product.modelId && product.colorId ? product : normalizeProduct(product);
+  const modelId = slugify(normalized.modelId || normalized.modelSlug || normalized.modelName || normalized.nombre || normalized.id || normalized.sku);
+  const colorId = slugify(normalized.colorId || normalized.colorName || normalized.color || normalized.id || normalized.sku);
+  return `${modelId}::${colorId}`;
+}
+
+function mergeProductRecord(current, incoming) {
+  const normalized = normalizeProduct(incoming);
+  if (!current) return normalized;
+  return normalizeProduct({ ...current, ...normalized });
+}
+
+function cleanProductList(records = [], options = {}) {
+  const includeInactive = options.includeInactive === true;
   const merged = new Map();
-  base.forEach((product) => merged.set(product.id, normalizeProduct(product)));
-  stored.forEach((product) => {
-    if (!product || !product.id) return;
-    const current = merged.get(product.id) || {};
-    merged.set(product.id, normalizeProduct({ ...current, ...product }));
+  records.flatMap(expandAdminRecord).forEach((record) => {
+    const normalized = normalizeProduct(record);
+    const key = productIdentityKey(normalized);
+    merged.set(key, mergeProductRecord(merged.get(key), normalized));
   });
-  return Array.from(merged.values());
+  return Array.from(merged.values()).filter((product) => includeInactive || product.active !== false);
+}
+
+function mergeCatalogRecords(base, stored) {
+  if (window.VyoreCatalog?.mergeCatalog) return window.VyoreCatalog.mergeCatalog(base, stored);
+  return mergeProducts(base.map(normalizeProduct), stored);
+}
+
+function mergeProducts(base, stored) {
+  return cleanProductList([...(base || []), ...(stored || [])], { includeInactive: true });
+}
+
+function loadDeletedProducts() {
+  return cleanProductList(loadStoredProducts().filter((product) => normalizeProduct(product).active === false), { includeInactive: true });
+}
+
+function loadAdminCatalog() {
+  return cleanProductList(mergeCatalogRecords(baseProducts, loadStoredProducts()), { includeInactive: false });
+}
+
+function sanitizeStoredProducts() {
+  const stored = loadStoredProducts();
+  if (!stored.length) return;
+  const cleaned = cleanProductList(stored, { includeInactive: true });
+  const before = JSON.stringify(stored.map((product) => normalizeProduct(product)));
+  const after = JSON.stringify(cleaned);
+  if (before === after) return;
+  try {
+    localStorage.setItem(PRODUCT_KEY, after);
+  } catch {
+    // Si el navegador bloquea storage, el admin igual renderiza la lista limpia en memoria.
+  }
 }
 
 function formatDate(isoDate) {
@@ -444,9 +499,21 @@ function filteredProducts() {
 
 function renderRows() {
   productRows.innerHTML = "";
-  filteredProducts().forEach((product) => productRows.appendChild(renderProductRow(product)));
+  const rows = filteredProducts();
+  if (!rows.length) productRows.appendChild(renderEmptyRow());
+  else rows.forEach((product) => productRows.appendChild(renderProductRow(product)));
   renderStats();
   renderCategoryOptions();
+}
+
+function renderEmptyRow() {
+  const row = document.createElement("tr");
+  const cell = document.createElement("td");
+  cell.colSpan = 11;
+  cell.className = "inventory-empty";
+  cell.textContent = search ? "No hay prendas que coincidan con la busqueda." : "No hay prendas activas en el inventario.";
+  row.appendChild(cell);
+  return row;
 }
 
 function renderCategoryOptions() {
@@ -472,8 +539,27 @@ function renderCategoryOptions() {
   else createCategory.value = values[0] || "";
 }
 
-function renderStockCell(product) {
+function formatMoney(value) {
+  return `S/ ${toNumber(value, 0).toFixed(2)}`;
+}
+
+function imageNode(product, className = "product-thumb") {
+  const image = document.createElement("img");
+  image.className = className;
+  image.src = adminAsset(product.imagen);
+  image.alt = product.nombre || "Producto";
+  image.addEventListener("error", () => {
+    if (!image.src.includes("isotipo-vyore.png")) image.src = "../assets/vyore/isotipo-vyore.png";
+  });
+  return image;
+}
+
+function renderStockCell(product, isEditing) {
   const stockCell = document.createElement("td");
+  if (!isEditing) {
+    stockCell.innerHTML = `<span class="stock-readonly">${product.stock ?? "--"}</span>`;
+    return stockCell;
+  }
   const stockInput = input("number", product.stock ?? "", "stock");
   stockInput.className = "stock-input";
   stockInput.min = "0";
@@ -481,90 +567,186 @@ function renderStockCell(product) {
   stockCell.appendChild(stockInput);
   return stockCell;
 }
-function renderProductRow(product) {
-  const row = document.createElement("tr");
-  row.dataset.id = product.id;
 
-  const skuCell = document.createElement("td");
-  const skuInput = input("text", product.sku, "sku");
-  skuInput.className = "stock-input";
-  const id = document.createElement("span");
-  id.className = "row-id";
-  id.textContent = product.id;
-  skuCell.append(skuInput, id);
+function renderSkuCell(product, isEditing) {
+  const cell = document.createElement("td");
+  if (isEditing) {
+    const skuInput = input("text", product.sku, "sku");
+    skuInput.className = "stock-input";
+    const id = document.createElement("span");
+    id.className = "row-id";
+    id.textContent = product.id;
+    cell.append(skuInput, id);
+    return cell;
+  }
+  cell.innerHTML = `<strong class="sku-code">${product.sku || product.id}</strong><span class="row-id">${product.id}</span>`;
+  return cell;
+}
 
-  const nameCell = document.createElement("td");
-  const nameInput = input("text", product.nombre, "nombre");
-  nameInput.className = "name-input";
-  nameCell.appendChild(nameInput);
-
-
-  const colorCell = document.createElement("td");
-  const colorWrap = document.createElement("div");
-  colorWrap.className = "color-editor";
-  const colorSwatch = document.createElement("input");
-  colorSwatch.type = "color";
-  colorSwatch.value = product.colorHex || "#817A75";
-  colorSwatch.dataset.field = "colorHex";
-  colorSwatch.addEventListener("input", (event) => updateProduct(event.target));
-  const colorInput = input("text", product.colorName || "Color por confirmar", "colorName");
-  colorInput.className = "color-input";
-  colorWrap.append(colorSwatch, colorInput);
-  colorCell.appendChild(colorWrap);
-
-  const categoryCell = document.createElement("td");
-  const categoryControl = categories().length > 1 ? select("categoria", categories(), product.categoria) : input("text", product.categoria, "categoria");
-  categoryControl.className = "category-input";
-  categoryCell.appendChild(categoryControl);
-
-  const publicCell = document.createElement("td");
-  const publicInput = input("number", product.precioPublico, "precioPublico");
-  publicInput.className = "price-input";
-  publicInput.step = "0.10";
-  publicInput.min = "0";
-  publicCell.appendChild(publicInput);
-
-  const studentCell = document.createElement("td");
-  const studentInput = input("number", product.precioAlumno, "precioAlumno");
-  studentInput.className = "price-input";
-  studentInput.step = "0.10";
-  studentInput.min = "0";
-  studentCell.appendChild(studentInput);
-
-  const stockCell = renderStockCell(product);
-
-  const statusCell = document.createElement("td");
-  const statusSelect = select("disponibilidad", ["consultar", "disponible", "bajo", "agotado"], product.disponibilidad);
-  syncStockStatus(row, product, statusSelect);
-  statusCell.appendChild(statusSelect);
-
-  const imageCell = document.createElement("td");
-  imageCell.className = "image-cell";
-  const imageEditor = document.createElement("div");
-  imageEditor.className = "image-editor";
-  const imagePreview = document.createElement("img");
-  imagePreview.className = "product-thumb";
-  imagePreview.src = adminAsset(product.imagen);
-  imagePreview.alt = product.nombre || "Producto";
-  imagePreview.addEventListener("error", () => {
-    if (!imagePreview.src.includes("isotipo-vyore.png")) {
-      imagePreview.src = "../assets/vyore/isotipo-vyore.png";
-    }
-  });
+function renderImageCell(product, isEditing) {
+  const cell = document.createElement("td");
+  cell.className = "image-cell";
+  const wrap = document.createElement("div");
+  wrap.className = `image-editor${isEditing ? "" : " readonly"}`;
+  const preview = imageNode(product);
+  if (!isEditing) {
+    const imagePath = document.createElement("span");
+    imagePath.className = "image-path";
+    imagePath.textContent = product.imagen || "Sin imagen";
+    wrap.append(preview, imagePath);
+    cell.appendChild(wrap);
+    return cell;
+  }
   const imageInput = input("text", product.imagen, "imagen");
   imageInput.className = "image-input";
   imageInput.addEventListener("input", () => {
-    imagePreview.src = adminAsset(imageInput.value);
+    preview.src = adminAsset(imageInput.value);
   });
-  imageEditor.append(imagePreview, imageInput);
-  imageCell.appendChild(imageEditor);
+  wrap.append(preview, imageInput);
+  cell.appendChild(wrap);
+  return cell;
+}
 
-  const featuredCell = document.createElement("td");
-  featuredCell.className = "featured-cell";
-  const featuredInput = input("checkbox", product.destacado, "destacado");
-  featuredCell.appendChild(featuredInput);
+function renderNameCell(product, isEditing) {
+  const cell = document.createElement("td");
+  if (isEditing) {
+    const nameInput = input("text", product.nombre, "nombre");
+    nameInput.className = "name-input";
+    cell.appendChild(nameInput);
+    return cell;
+  }
+  cell.innerHTML = `<strong class="product-name-readonly">${product.nombre || "Sin nombre"}</strong>`;
+  return cell;
+}
 
-  row.append(skuCell, imageCell, nameCell, colorCell, categoryCell, publicCell, studentCell, stockCell, statusCell, featuredCell);
+function renderColorCell(product, isEditing) {
+  const cell = document.createElement("td");
+  if (isEditing) {
+    const colorWrap = document.createElement("div");
+    colorWrap.className = "color-editor";
+    const colorSwatch = document.createElement("input");
+    colorSwatch.type = "color";
+    colorSwatch.value = product.colorHex || "#817A75";
+    colorSwatch.dataset.field = "colorHex";
+    colorSwatch.addEventListener("input", (event) => updateProduct(event.target));
+    const colorInput = input("text", product.colorName || "Color por confirmar", "colorName");
+    colorInput.className = "color-input";
+    colorWrap.append(colorSwatch, colorInput);
+    cell.appendChild(colorWrap);
+    return cell;
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "color-display";
+  const dot = document.createElement("span");
+  dot.className = "color-dot";
+  dot.style.backgroundColor = product.colorHex || "#817A75";
+  const name = document.createElement("strong");
+  name.textContent = product.colorName || "Color por confirmar";
+  wrap.append(dot, name);
+  cell.appendChild(wrap);
+  return cell;
+}
+
+function renderCategoryCell(product, isEditing) {
+  const cell = document.createElement("td");
+  if (isEditing) {
+    const categoryControl = categories().length > 1 ? select("categoria", categories(), product.categoria) : input("text", product.categoria, "categoria");
+    categoryControl.className = "category-input";
+    cell.appendChild(categoryControl);
+    return cell;
+  }
+  cell.innerHTML = `<span class="category-pill">${label(product.categoria)}</span>`;
+  return cell;
+}
+
+function renderPriceCell(product, field, isEditing) {
+  const cell = document.createElement("td");
+  if (isEditing) {
+    const priceInput = input("number", product[field], field);
+    priceInput.className = "price-input";
+    priceInput.step = "0.10";
+    priceInput.min = "0";
+    cell.appendChild(priceInput);
+    return cell;
+  }
+  cell.innerHTML = `<strong class="price-readonly">${formatMoney(product[field])}</strong>`;
+  return cell;
+}
+
+function renderStatusCell(row, product, isEditing) {
+  const cell = document.createElement("td");
+  if (isEditing) {
+    const statusSelect = select("disponibilidad", ["consultar", "disponible", "bajo", "agotado"], product.disponibilidad);
+    syncStockStatus(row, product, statusSelect);
+    cell.appendChild(statusSelect);
+    return cell;
+  }
+  const status = productStockSummary(product).disponibilidad;
+  cell.innerHTML = `<span class="status-pill ${status}">${label(status)}</span>`;
+  return cell;
+}
+
+function renderFeaturedCell(product, isEditing) {
+  const cell = document.createElement("td");
+  cell.className = "featured-cell";
+  if (isEditing) {
+    const featuredInput = input("checkbox", product.destacado, "destacado");
+    cell.appendChild(featuredInput);
+    return cell;
+  }
+  cell.innerHTML = `<span class="feature-badge${product.destacado ? " active" : ""}">${product.destacado ? "Destacado" : "No"}</span>`;
+  return cell;
+}
+
+function actionButton(kind, icon, text, handler) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `row-action ${kind}`;
+  button.innerHTML = `<i class="fas ${icon}" aria-hidden="true"></i><span>${text}</span>`;
+  button.addEventListener("click", handler);
+  return button;
+}
+
+function renderActionsCell(product, isEditing) {
+  const cell = document.createElement("td");
+  cell.className = "actions-cell";
+  const actions = document.createElement("div");
+  actions.className = "row-actions";
+  if (isEditing) {
+    actions.append(
+      actionButton("save", "fa-check", "Guardar", () => saveProductRow(product.id)),
+      actionButton("cancel", "fa-times", "Cancelar", () => cancelProductRow(product.id)),
+    );
+  } else {
+    actions.append(
+      actionButton("edit", "fa-pen", "Editar", () => beginRowEdit(product.id)),
+      actionButton("delete", "fa-trash-alt", "Eliminar", () => deleteProductRow(product.id)),
+    );
+  }
+  cell.appendChild(actions);
+  return cell;
+}
+
+function renderProductRow(product) {
+  const row = document.createElement("tr");
+  const isEditing = rowSnapshots.has(product.id);
+  row.dataset.id = product.id;
+  row.className = isEditing ? "is-editing" : "";
+
+  row.append(
+    renderSkuCell(product, isEditing),
+    renderImageCell(product, isEditing),
+    renderNameCell(product, isEditing),
+    renderColorCell(product, isEditing),
+    renderCategoryCell(product, isEditing),
+    renderPriceCell(product, "precioPublico", isEditing),
+    renderPriceCell(product, "precioAlumno", isEditing),
+    renderStockCell(product, isEditing),
+    renderStatusCell(row, product, isEditing),
+    renderFeaturedCell(product, isEditing),
+    renderActionsCell(product, isEditing),
+  );
+  if (isEditing) syncFeaturedEligibility(row, product);
   return row;
 }
 
@@ -630,6 +812,115 @@ function syncStockStatus(row, product, statusSelect = row?.querySelector("select
   }
   statusSelect.value = product.disponibilidad;
 }
+
+function cloneProduct(product) {
+  return JSON.parse(JSON.stringify(product));
+}
+
+function findProductById(id) {
+  return products.find((item) => item.id === id);
+}
+
+function findDuplicateProduct(product, currentId = null) {
+  const key = productIdentityKey(product);
+  const sku = normalize(product.sku || "");
+  return products.find((item) => {
+    if (item.id === currentId) return false;
+    return productIdentityKey(item) === key || (sku && normalize(item.sku || "") === sku);
+  }) || null;
+}
+
+function validateProductRecord(product, currentId = null) {
+  if (!String(product.sku || "").trim()) return "La prenda necesita SKU.";
+  if (!String(product.nombre || "").trim()) return "La prenda necesita nombre.";
+  if (!String(product.categoria || "").trim()) return "La prenda necesita categoria.";
+  if (!Number.isFinite(toNumber(product.precioPublico, NaN))) return "El precio publico no es valido.";
+  const duplicate = findDuplicateProduct(product, currentId);
+  if (duplicate) return `Ya existe ${duplicate.nombre} en color ${duplicate.colorName || "registrado"}.`;
+  return "";
+}
+
+function removeDeletedOverrideFor(product) {
+  const key = productIdentityKey(product);
+  deletedProducts = deletedProducts.filter((item) => productIdentityKey(item) !== key);
+}
+
+function upsertDeletedOverride(product) {
+  const normalized = normalizeProduct({
+    ...product,
+    active: false,
+    stock: 0,
+    disponibilidad: "agotado",
+    destacado: false,
+    featured: false,
+    actualizadoStock: todayIso(),
+  });
+  deletedProducts = deletedProducts.filter((item) => productIdentityKey(item) !== productIdentityKey(normalized));
+  deletedProducts.push(normalized);
+}
+
+function beginRowEdit(id) {
+  if (!requireSession(true)) return;
+  const product = findProductById(id);
+  if (!product || rowSnapshots.has(id)) return;
+  rowSnapshots.set(id, cloneProduct(product));
+  renderRows();
+}
+
+function saveProductRow(id) {
+  if (!requireSession(true)) return;
+  const product = findProductById(id);
+  if (!product) return;
+  const validation = validateProductRecord(product, id);
+  if (validation) {
+    notify({ type: "warning", title: "No se puede guardar", text: validation });
+    return;
+  }
+  const index = products.findIndex((item) => item.id === id);
+  const normalized = normalizeProduct(product);
+  if (!canFeatureProduct(normalized)) {
+    normalized.destacado = false;
+    normalized.featured = false;
+  }
+  products[index] = normalized;
+  products = cleanProductList(products, { includeInactive: false });
+  removeDeletedOverrideFor(normalized);
+  rowSnapshots.delete(id);
+  dirty = true;
+  renderRows();
+}
+
+function cancelProductRow(id) {
+  const snapshot = rowSnapshots.get(id);
+  if (!snapshot) return;
+  const index = products.findIndex((item) => item.id === id);
+  if (index !== -1) products[index] = snapshot;
+  rowSnapshots.delete(id);
+  renderRows();
+}
+
+async function deleteProductRow(id) {
+  if (!requireSession(true)) return;
+  const product = findProductById(id);
+  if (!product) return;
+  const ok = await askConfirm({
+    type: "warning",
+    title: "Eliminar prenda",
+    text: `Quitar ${product.nombre} ${product.colorName || ""} del inventario visible.`,
+    confirmText: "Eliminar",
+    cancelText: "Cancelar",
+  });
+  if (!ok) return;
+
+  if (baseProductKeys.has(productIdentityKey(product))) upsertDeletedOverride(product);
+  else removeDeletedOverrideFor(product);
+  products = products.filter((item) => item.id !== id);
+  rowSnapshots.delete(id);
+  dirty = true;
+  renderRows();
+  notify({ type: "success", title: "Prenda eliminada", text: "La tienda dejara de mostrar esta prenda cuando guardes los cambios." });
+}
+
 function updateProduct(control) {
   const row = control.closest("tr");
   const product = products.find((item) => item.id === row.dataset.id);
@@ -760,11 +1051,13 @@ function addProduct(event) {
     return;
   }
 
-  if (products.some((item) => normalize(item.sku) === normalize(product.sku))) {
-    notify({ type: "error", title: "SKU duplicado", text: "Ya existe un producto con ese SKU." });
+  const validation = validateProductRecord(product);
+  if (validation) {
+    notify({ type: "error", title: "Producto duplicado", text: validation });
     return;
   }
 
+  removeDeletedOverrideFor(product);
   products.unshift(product);
   dirty = true;
   search = "";
@@ -777,24 +1070,28 @@ function addProduct(event) {
 function saveProducts() {
   if (!requireSession(true)) return;
   const normalized = products.map((product) => {
-    if (!canFeatureProduct(product)) {
-      product.destacado = false;
-      product.featured = false;
+    const copy = normalizeProduct(product);
+    if (!canFeatureProduct(copy)) {
+      copy.destacado = false;
+      copy.featured = false;
     }
-    return normalizeProduct(product);
+    return copy;
   });
+  const combined = cleanProductList([...deletedProducts, ...normalized], { includeInactive: true });
   const meta = {
     ...baseMeta,
     actualizadoStock: todayIso(),
     actualizadoPrecios: todayIso(),
   };
-  localStorage.setItem(PRODUCT_KEY, JSON.stringify(normalized));
+  localStorage.setItem(PRODUCT_KEY, JSON.stringify(combined));
   localStorage.setItem(META_KEY, JSON.stringify(meta));
-  products = normalized;
+  deletedProducts = combined.filter((product) => product.active === false);
+  products = combined.filter((product) => product.active !== false);
+  rowSnapshots.clear();
   dirty = false;
   renderMeta();
   renderRows();
-  notify({ type: "success", title: "Cambios guardados", text: "El catálogo local fue actualizado." });
+  notify({ type: "success", title: "Cambios guardados", text: "El catálogo local fue actualizado sin duplicados." });
 }
 
 function exportProductsXlsx() {

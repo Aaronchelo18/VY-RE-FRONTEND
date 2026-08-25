@@ -10,14 +10,16 @@ const money = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN
 const params = new URLSearchParams(window.location.search);
 const slug = params.get("slug") || window.location.hash.replace(/^#/, "");
 const product = PRODUCTS.find((item) => item.slug === slug || item.id === slug) || PRODUCTS[0];
-const requestedVariant = params.get("color") || params.get("variant") || params.get("sku") || product?.featuredVariantId || null;
+const requestedVariantId = params.get("color") || params.get("variant") || params.get("sku") || null;
+const requestedVariant = product?.variantes?.find((variant) => variant.id === requestedVariantId || variant.colorId === requestedVariantId || variant.sku === requestedVariantId) || null;
 const initialVariant =
-  product?.variantes?.find((variant) => variant.id === requestedVariant || variant.colorId === requestedVariant || variant.sku === requestedVariant) ||
-  product?.variantes?.find((variant) => variant.id === product?.featuredVariantId || variant.sku === product?.featuredSku) ||
-  product?.variantes?.find((variant) => variant.active !== false && variant.stock !== 0) ||
+  (requestedVariant && availability(requestedVariant).canBuy ? requestedVariant : null) ||
+  product?.variantes?.find((variant) => availability(variant).canBuy) ||
   product?.variantes?.[0];
 const state = { selectedVariantId: initialVariant?.id || null };
-if ((product?.slug || product?.id) === "blusa-suplex") document.body.classList.add("product-page--blusa-suplex");
+const productSlug = product?.slug || product?.id;
+if (productSlug === "blusa-suplex") document.body.classList.add("product-page--blusa-suplex");
+if (productSlug === "blusa-suplex-amarre") document.body.classList.add("product-page--blusa-suplex-amarre");
 
 const image = document.querySelector("#productImage");
 const category = document.querySelector("#productCategory");
@@ -33,6 +35,9 @@ const addToCartButton = document.querySelector("#addToCart");
 const sendWhatsapp = document.querySelector("#sendWhatsapp");
 const toast = document.querySelector("#toast");
 const productHeaderCartCount = document.querySelector("#productHeaderCartCount");
+const productMenuToggle = document.querySelector("#productMenuToggle");
+const productMainNav = document.querySelector("#productMainNav");
+const productMenuBackdrop = document.querySelector("#productMenuBackdrop");
 
 function normalize(text) {
   return String(text ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
@@ -56,10 +61,10 @@ function migrateBlusaSuplexAmarreVariant(variant = {}, product = {}, image = "")
   const isTarget = productId === "blusa-suplex-amarre" || currentImage.includes("blusa-suplex-amarre");
   if (!isTarget) return { ...variant, image };
 
-  const match = currentImage.match(/blusa-suplex-amarre-(0[1-6])-(azul|beige|marron|rosado|rojo|verde|negro)\.(jpg|png)$/);
+  const match = currentImage.match(/blusa-suplex-amarre-(0[1-6])-(azul|beige|amarillo|marron|rosado|rojo|verde|negro)\.(jpg|png)$/);
   let nextImage = currentImage;
   if (match) {
-    const color = match[2] === "marron" ? "rosado" : match[2];
+    const color = match[2] === "marron" ? "rosado" : match[2] === "beige" ? "amarillo" : match[2];
     nextImage = `assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-${match[1]}-${color}.png`;
   }
 
@@ -79,7 +84,7 @@ function migrateBlusaSuplexProduct(product = {}) {
   const productId = String(product.id || product.slug || "");
   if (productId !== "blusa-suplex") return product;
 
-  const mainImage = "assets/productos/vyore/catalogo/blusa-suplex.png";
+  const mainImage = "assets/productos/vyore/variantes/IMAGENES-REFERENCIALES/blusa-suplex.png";
   const variants = [
     {
       id: "blanco",
@@ -145,7 +150,7 @@ function migrateSuplexLazzoDobleForroProduct(product = {}) {
   const productId = String(product.id || product.slug || "");
   if (productId !== "suplex-lazzo-doble-forro") return product;
 
-  const mainImage = "assets/productos/vyore/catalogo/suplex-lazzo-doble-forro.png";
+  const mainImage = "assets/productos/vyore/variantes/IMAGENES-REFERENCIALES/suplex-lazzo-doble-forro.png";
   const variants = [
     {
       id: "marron",
@@ -233,7 +238,7 @@ function migrateOlimpicoSuplexProduct(product = {}) {
   const productId = String(product.id || product.slug || "");
   if (productId !== "olimpico-suplex") return product;
 
-  const mainImage = "assets/productos/vyore/olimpico-suplex.png";
+  const mainImage = "assets/productos/vyore/variantes/IMAGENES-REFERENCIALES/olimpico-suplex.png";
   const variants = [
     {
       id: "marron",
@@ -384,7 +389,7 @@ function asset(path) {
 }
 function availability(variant) {
   const stock = parseStock(variant?.stock);
-  if (!variant || variant.active === false || stock === 0) return { label: "Agotado", canBuy: false };
+  if (!variant || variant.active === false || variant.disponibilidad === "agotado" || stock === 0) return { label: "Agotado", canBuy: false };
   if (stock !== null) return { label: `${stock} disponible${stock === 1 ? "" : "s"}`, canBuy: true };
   return { label: "Disponible", canBuy: true };
 }
@@ -464,6 +469,15 @@ function showToast(message) {
   window.clearTimeout(showToast.timeout);
   showToast.timeout = window.setTimeout(() => toast.classList.remove("show"), 2000);
 }
+function toggleProductMenu() {
+  const open = !document.body.classList.contains("menu-open");
+  document.body.classList.toggle("menu-open", open);
+  productMenuToggle?.setAttribute("aria-expanded", String(open));
+}
+function closeProductMenu() {
+  document.body.classList.remove("menu-open");
+  productMenuToggle?.setAttribute("aria-expanded", "false");
+}
 function renderVariants() {
   variantOptions.innerHTML = "";
   product.variantes.forEach((variant) => {
@@ -531,6 +545,14 @@ if (!product) {
   syncVariant();
   renderHeaderCartCount();
 }
+
+productMenuToggle?.addEventListener("click", toggleProductMenu);
+productMenuBackdrop?.addEventListener("click", closeProductMenu);
+productMainNav?.addEventListener("click", closeProductMenu);
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeProductMenu();
+});
 
 addToCartButton.addEventListener("click", () => {
   const variant = selectedVariant();

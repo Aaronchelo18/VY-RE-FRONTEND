@@ -939,7 +939,7 @@ a.disabled {
     background:
       radial-gradient(circle at 78% 16%, rgba(255, 255, 255, .86), rgba(255, 255, 255, 0) 34%),
       linear-gradient(180deg, rgba(250, 247, 242, .16), rgba(243, 237, 228, .92)),
-      url("assets/productos/vyore/catalogo/suplex-amarre-hebilla.png") center 22px / auto 88% no-repeat;
+      url("assets/vyore/hero-vyore.jpg") center / cover no-repeat;
     transform: none;
   }
 
@@ -1178,5 +1178,461 @@ a.disabled {
   .arrival-item strong {
     font-size: .82rem;
     line-height: 1.08;
+  }
+}
+/* VYORE storefront recovery */
+@media (min-width: 701px) {
+  .hero {
+    min-height: 100svh;
+    padding: clamp(104px, 13vh, 144px) clamp(20px, 7vw, 96px) clamp(64px, 9vh, 96px);
+    background: #F5F0E9;
+  }
+
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    height: auto;
+    margin: 0;
+    background:
+      linear-gradient(90deg, rgba(245, 240, 233, .98) 0%, rgba(245, 240, 233, .84) 36%, rgba(245, 240, 233, .42) 66%, rgba(245, 240, 233, .14) 100%),
+      url("assets/vyore/logo-vyore-background.png") center center / cover no-repeat;
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-media::before,
+  .hero-media::after,
+  .hero::before,
+  .hero::after {
+    content: none;
+  }
+
+  .hero-content,
+  .hero h1 {
+    color: #171717;
+  }
+
+  .hero-text {
+    color: rgba(23, 23, 23, .72);
+  }
+
+  .hero-actions {
+    display: flex;
+    grid-template-columns: none;
+  }
+}
+
+.story-mark {
+  border: 0;
+  background: transparent;
+}
+
+.story-mark::before,
+.story-mark::after {
+  content: none;
+}
+
+.product-grid,
+.featured-grid,
+.new-arrivals {
+  align-items: start;
+}
+
+.product-card,
+.arrival-item {
+  --home-media-scale: 1.08;
+  min-width: 0;
+}
+
+.product-card[data-product-slug="suplex-amarre-hebilla"],
+.arrival-item[data-product-slug="suplex-amarre-hebilla"],
+.product-card[data-product-slug="olimpico-suplex"],
+.arrival-item[data-product-slug="olimpico-suplex"],
+.product-card[data-product-slug="suplex-lazzo-doble-forro"],
+.arrival-item[data-product-slug="suplex-lazzo-doble-forro"] {
+  --home-media-scale: 1.2;
+}
+
+.product-card[data-product-slug="blusa-suplex"],
+.arrival-item[data-product-slug="blusa-suplex"] {
+  --home-media-scale: 1.34;
+}
+
+.product-card[data-product-slug="blusa-suplex-amarre"],
+.arrival-item[data-product-slug="blusa-suplex-amarre"],
+.product-card[data-product-slug="suplex-corset"],
+.arrival-item[data-product-slug="suplex-corset"],
+.product-card[data-product-slug="suplex-doble-forro"],
+.arrival-item[data-product-slug="suplex-doble-forro"] {
+  --home-media-scale: 1;
+}
+
+.product-image-button,
+.arrival-media {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: #F3EDE4;
+}
+
+.product-image-button,
+.arrival-media {
+  aspect-ratio: 4 / 5;
+}
+
+.product-image-button img,
+.product-card--soft-shrink .product-image-button img,
+.product-card--blusa-suplex .product-image-button img,
+.product-card[data-product-slug] .product-image-button img,
+.arrival-media img,
+.arrival-item--fit .arrival-media img,
+.arrival-item[data-product-slug] .arrival-media img {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 0;
+  object-fit: contain;
+  object-position: center top;
+  transform: scale(var(--home-media-scale));
+  transform-origin: top center;
+  background: transparent;
+  transition: filter .18s ease, opacity .18s ease;
+}
+
+.product-card:hover .product-image-button img,
+.product-card--soft-shrink:hover .product-image-button img,
+.product-card--blusa-suplex:hover .product-image-button img,
+.product-card[data-product-slug]:hover .product-image-button img,
+.arrival-item:hover .arrival-media img,
+.arrival-item[data-product-slug]:hover .arrival-media img {
+  transform: scale(var(--home-media-scale));
+}
+
+.product-card:hover .product-image-button,
+.arrival-item:hover .arrival-media {
+  filter: saturate(1.02) contrast(1.01);
+}
+
+.product-body {
+  padding-top: 12px;
+}
+
+.product-card h3,
+.arrival-item strong {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 981px) {
+  .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 250px));
+    justify-content: space-between;
+    gap: 46px 34px;
+  }
+
+  .featured-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
+    justify-content: start;
+    gap: 42px 54px;
+  }
+
+  .new-arrivals {
+    grid-template-columns: repeat(3, minmax(0, 300px));
+    max-width: 1020px;
+    gap: 28px 32px;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 980px) {
+  .product-grid,
+  .featured-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 30px 18px;
+  }
+
+  .new-arrivals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: none;
+    gap: 22px 14px;
+  }
+}
+
+@media (max-width: 700px) {
+  .product-image-button,
+  .arrival-media {
+    aspect-ratio: 4 / 5;
+  }
+
+  .product-image-button img,
+  .product-card--soft-shrink .product-image-button img,
+  .product-card--blusa-suplex .product-image-button img,
+  .product-card[data-product-slug] .product-image-button img,
+  .arrival-media img,
+  .arrival-item--fit .arrival-media img,
+  .arrival-item[data-product-slug] .arrival-media img {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    object-position: center top;
+    transform: scale(var(--home-media-scale));
+  }
+}
+
+/* Mobile hero cleanup: no photographic/background panel before the intro copy */
+@media (max-width: 700px) {
+  .hero {
+    display: grid;
+    align-items: center;
+    min-height: calc(100svh - 74px);
+    padding: 104px 24px 52px;
+    background:
+      linear-gradient(90deg, rgba(245, 240, 233, .98) 0%, rgba(245, 240, 233, .9) 46%, rgba(245, 240, 233, .72) 100%),
+      url("assets/vyore/logo-vyore-background.png") right -44px center / auto 78% no-repeat,
+      #F5F0E9;
+  }
+
+  .hero-media {
+    display: none;
+  }
+
+  .hero-content {
+    width: min(100%, 360px);
+    color: #171717;
+  }
+
+  .hero h1 {
+    max-width: 6.8ch;
+    font-size: clamp(3rem, 13vw, 3.9rem);
+    line-height: .96;
+  }
+
+  .hero-text {
+    max-width: 13.5em;
+    margin-top: 18px;
+    color: rgba(23, 23, 23, .72);
+    font-size: clamp(1.15rem, 5vw, 1.45rem);
+    line-height: 1.22;
+  }
+
+  .hero-actions {
+    display: flex;
+    grid-template-columns: none;
+    margin-top: 28px;
+  }
+
+  .hero-actions .btn {
+    flex: 0 0 auto;
+    min-width: 0;
+    padding-inline: 20px;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero {
+    padding-inline: 20px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.75rem, 13vw, 3.25rem);
+  }
+}
+
+/* Mobile footer contact pass */
+.footer-action {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .instagram-strip {
+    display: none;
+  }
+
+  .site-footer {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    width: min(100% - 32px, var(--container));
+    padding: 38px 0 48px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+  }
+
+  .site-footer .footer-brand,
+  .site-footer .footer-column {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .site-footer .footer-brand {
+    order: 1;
+    max-width: none;
+    gap: 18px;
+    padding: 0 0 24px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-footer .footer-brand img {
+    width: 112px;
+  }
+
+  .site-footer .footer-brand p {
+    max-width: 34ch;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .footer-purchase {
+    order: 2;
+    gap: 12px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .footer-contact {
+    order: 3;
+    gap: 10px;
+    padding-top: 24px;
+  }
+
+  .footer-column strong {
+    color: var(--wine);
+    font-size: .78rem;
+  }
+
+  .footer-purchase span {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 8px;
+    align-items: baseline;
+    line-height: 1.45;
+  }
+
+  .footer-purchase span::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--wine);
+    opacity: .72;
+    transform: translateY(-1px);
+  }
+
+  .footer-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    width: 100%;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 800;
+    text-align: center;
+  }
+
+  .footer-action--whatsapp {
+    background: var(--wine);
+    color: #fff !important;
+    box-shadow: 0 18px 34px rgba(104, 45, 66, .18);
+  }
+
+  .footer-contact .footer-whatsapp,
+  .footer-contact .footer-social {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .52);
+    color: var(--black);
+    font-size: .94rem;
+    font-weight: 650;
+  }
+
+  .footer-contact .footer-whatsapp::after,
+  .footer-contact .footer-social::after {
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 760;
+    text-transform: uppercase;
+  }
+
+  .footer-contact .footer-whatsapp::after {
+    content: "WhatsApp";
+  }
+
+  .footer-contact .footer-social {
+    color: var(--wine);
+  }
+
+  .footer-contact .footer-social::after {
+    content: "Instagram";
+  }
+}
+
+/* Mobile footer compact contact links */
+@media (max-width: 700px) {
+  .footer-contact {
+    gap: 13px;
+  }
+
+  .footer-contact .footer-action {
+    display: none;
+  }
+
+  .footer-contact .footer-contact-link,
+  .footer-contact .footer-whatsapp,
+  .footer-contact .footer-social {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--black);
+    font-size: 1.05rem;
+    font-weight: 760;
+    line-height: 1.2;
+  }
+
+  .footer-contact .footer-social {
+    color: var(--wine);
+  }
+
+  .footer-contact .footer-whatsapp::after,
+  .footer-contact .footer-social::after {
+    content: none;
+    display: none;
+  }
+
+  .footer-contact-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    color: var(--wine);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+/* Keep footer icons mobile-only */
+@media (min-width: 701px) {
+  .footer-contact-icon {
+    display: none;
+  }
+
+  .footer-contact-link {
+    color: var(--muted);
   }
 }

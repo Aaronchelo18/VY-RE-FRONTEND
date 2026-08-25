@@ -339,3 +339,428 @@
     min-height: 40px;
   }
 }
+/* VYORE product page corrections */
+.product-page-body {
+  min-height: 100vh;
+  background: #F5F0E9;
+}
+
+.product-page-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: block;
+  min-height: 0;
+  border-bottom: 1px solid var(--line);
+  background: rgba(245, 240, 233, .96);
+  padding: 0;
+  backdrop-filter: blur(16px);
+}
+
+.product-page-header .topbar {
+  position: static;
+  inset: auto;
+  min-height: 74px;
+  border-bottom: 0;
+  background: transparent;
+}
+
+.product-page-header .brand,
+.product-page-header .brand img {
+  width: 108px;
+}
+
+.product-page-header .cart-nav {
+  grid-template-columns: 20px auto;
+  min-height: 38px;
+  padding: 7px 9px;
+}
+
+.product-page-header .cart-nav span {
+  display: none;
+}
+
+.product-page-header .main-nav {
+  top: 74px;
+}
+
+.product-page {
+  align-items: start;
+  padding-top: clamp(24px, 4vw, 48px);
+}
+
+.product-gallery {
+  position: sticky;
+  top: 98px;
+  min-height: clamp(470px, 66vh, 660px);
+  border: 1px solid rgba(104, 45, 66, .12);
+  background: #F3EDE4;
+  box-shadow: 0 18px 42px rgba(42, 32, 27, .07);
+}
+
+.product-gallery::before,
+.product-gallery::after {
+  content: none;
+}
+
+.product-gallery img {
+  box-sizing: border-box;
+  width: 100%;
+  height: clamp(420px, 62vh, 640px);
+  max-height: none;
+  padding: 5%;
+  object-fit: contain;
+  object-position: center center;
+  background: transparent;
+}
+
+.product-page--blusa-suplex-amarre .product-gallery img,
+.product-page--blusa-suplex .product-gallery img {
+  width: 100%;
+  height: clamp(420px, 62vh, 640px);
+  padding: 4%;
+}
+
+.product-info {
+  gap: 18px;
+}
+
+.product-info h1 {
+  max-width: 680px;
+  font-size: clamp(2.45rem, 5.6vw, 5.1rem);
+}
+
+.product-facts {
+  border-color: rgba(104, 45, 66, .14);
+  background: rgba(255, 255, 255, .48);
+  box-shadow: 0 12px 30px rgba(42, 32, 27, .05);
+}
+
+.product-variants {
+  gap: 14px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(104, 45, 66, .12);
+  padding-top: 18px;
+}
+
+.variant-title-row strong {
+  border: 1px solid rgba(104, 45, 66, .14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .5);
+  color: var(--wine);
+  padding: 7px 11px;
+}
+
+.product-page .variant-options {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.product-page .variant-option {
+  position: relative;
+  grid-template-rows: clamp(170px, 15vw, 210px) auto;
+  overflow: hidden;
+  border: 1px solid rgba(104, 45, 66, .12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .62);
+  box-shadow: 0 12px 28px rgba(42, 32, 27, .045);
+  transform: none;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.product-page .variant-option:hover:not(:disabled) {
+  border-color: rgba(104, 45, 66, .28);
+  box-shadow: 0 16px 32px rgba(42, 32, 27, .07);
+  transform: none;
+}
+
+.product-page .variant-option.is-selected {
+  border-color: var(--wine);
+  box-shadow: 0 0 0 1px var(--wine), 0 16px 34px rgba(104, 45, 66, .1);
+}
+
+.product-page .variant-option img,
+.product-page .variant-option[data-variant-id] img,
+.product-page-body.product-page--blusa-suplex-amarre .product-page .variant-option[data-variant-id] img {
+  box-sizing: border-box;
+  width: 100%;
+  height: clamp(170px, 15vw, 210px);
+  padding: 5%;
+  object-fit: contain;
+  object-position: center center;
+  background: #F3EDE4;
+  transform: none;
+}
+
+.product-page--blusa-suplex-amarre .variant-option img,
+.product-page-body.product-page--blusa-suplex-amarre .product-page .variant-option[data-variant-id] img {
+  padding: 4%;
+}
+
+.product-page .variant-option .variant-info {
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 6px 8px;
+  border-top: 1px solid rgba(104, 45, 66, .08);
+  background: rgba(255, 255, 255, .78);
+  padding: 11px 12px 12px;
+}
+
+.product-page .variant-option strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #171717;
+  font-size: .82rem;
+}
+
+.product-page .variant-option em {
+  color: rgba(23, 23, 23, .6);
+  font-size: .72rem;
+}
+
+.product-page .variant-option:disabled img {
+  filter: grayscale(1);
+  opacity: .26;
+}
+
+.product-actions .btn {
+  min-height: 46px;
+}
+
+
+@media (max-width: 860px) {
+  .product-page {
+    grid-template-columns: 1fr;
+  }
+
+  .product-gallery {
+    position: relative;
+    top: auto;
+    min-height: 390px;
+  }
+
+  .product-gallery img,
+  .product-page--blusa-suplex-amarre .product-gallery img,
+  .product-page--blusa-suplex .product-gallery img {
+    height: clamp(330px, 68vw, 500px);
+  }
+}
+
+@media (max-width: 700px) {
+  .product-page-header .topbar {
+    min-height: 74px;
+    padding: 10px 18px;
+  }
+
+  .product-page-header .brand,
+  .product-page-header .brand img {
+    width: 108px;
+  }
+
+  .product-page-header .main-nav {
+    top: 84px;
+  }
+}
+
+@media (max-width: 560px) {
+  .product-page {
+    width: min(100% - 24px, 1160px);
+    gap: 22px;
+    padding: 18px 0 46px;
+  }
+
+  .product-gallery {
+    min-height: 340px;
+    border-radius: 8px;
+  }
+
+  .product-gallery img,
+  .product-page--blusa-suplex-amarre .product-gallery img,
+  .product-page--blusa-suplex .product-gallery img {
+    height: clamp(300px, 82vw, 410px);
+    padding: 4%;
+  }
+
+  .product-info h1 {
+    font-size: clamp(2.2rem, 12vw, 3.35rem);
+  }
+
+  .variant-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .product-page .variant-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .product-page .variant-option {
+    grid-template-rows: clamp(146px, 40vw, 184px) auto;
+  }
+
+  .product-page .variant-option img,
+  .product-page .variant-option[data-variant-id] img,
+  .product-page-body.product-page--blusa-suplex-amarre .product-page .variant-option[data-variant-id] img {
+    height: clamp(146px, 40vw, 184px);
+    padding: 4%;
+  }
+
+  .product-page .variant-option .variant-info {
+    padding: 10px;
+  }
+
+  .product-page .variant-option strong {
+    font-size: .78rem;
+  }
+
+  .product-page .variant-option em {
+    font-size: .7rem;
+  }
+}
+/* VYORE product media containment correction */
+.product-gallery,
+.product-page .variant-option {
+  overflow: hidden;
+}
+
+.product-gallery img,
+.product-page .variant-option img,
+.product-page .variant-option[data-variant-id] img {
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  transform: none;
+}
+
+.product-page .variant-option img,
+.product-page .variant-option[data-variant-id] img {
+  padding: 12px;
+  background: #F3EDE4;
+}
+/* VYORE variant card fit v2 */
+.product-page .variant-option {
+  overflow: hidden;
+}
+
+.product-page .variant-option img,
+.product-page .variant-option[data-variant-id] img {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  object-fit: contain;
+  object-position: center center;
+  background: #F3EDE4;
+  transform: none;
+}
+
+/* Product detail back arrow */
+.product-visual {
+  display: grid;
+  align-self: start;
+  gap: 12px;
+}
+
+.product-gallery-back {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(104, 45, 66, .16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .58);
+  color: var(--wine);
+  box-shadow: 0 12px 28px rgba(42, 32, 27, .055);
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.product-gallery-back:hover {
+  transform: translateX(-2px);
+  border-color: rgba(104, 45, 66, .32);
+  background: rgba(255, 255, 255, .82);
+}
+
+.product-gallery-back svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (min-width: 861px) {
+  .product-visual {
+    position: sticky;
+    top: 98px;
+  }
+
+  .product-visual .product-gallery {
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (max-width: 860px) {
+  .product-visual {
+    gap: 10px;
+  }
+}
+
+/* Product mobile menu layer fix */
+@media (max-width: 980px) {
+  .product-page-header {
+    z-index: 90;
+    isolation: isolate;
+  }
+
+  .product-page-header .product-topbar {
+    position: relative;
+    z-index: 130;
+    background: rgba(245, 240, 233, .96);
+  }
+
+  .product-page-header .product-main-nav {
+    z-index: 140;
+  }
+
+  .product-page-header .product-menu-backdrop {
+    top: 74px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+  }
+}
+
+@media (max-width: 700px) {
+  .product-page-header .product-menu-backdrop {
+    top: 74px;
+  }
+
+  .product-page-header .product-main-nav {
+    top: 84px;
+    z-index: 140;
+  }
+}
+
+/* Keep selected variant highlight inside the mobile card */
+@media (max-width: 700px) {
+  .product-page .variant-option.is-selected {
+    border-color: var(--wine);
+    box-shadow: inset 0 0 0 1px var(--wine);
+  }
+
+  .product-page .variant-option:hover:not(:disabled) {
+    box-shadow: none;
+  }
+
+  .product-page .variant-option.is-selected:hover:not(:disabled) {
+    box-shadow: inset 0 0 0 1px var(--wine);
+  }
+}

@@ -58,7 +58,7 @@
     ],
     "blusa-suplex-amarre": [
       { id: "azul", colorName: "Azul", colorHex: "#103C9A", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-01-azul.png" },
-      { id: "amarillo", colorName: "Amarillo", colorHex: "#F3D85D", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-02-beige.png", aliases: ["beige"] },
+      { id: "amarillo", colorName: "Amarillo", colorHex: "#F3D85D", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-02-amarillo.png", aliases: ["beige"] },
       { id: "rosado", colorName: "Rosado", colorHex: "#C98A9B", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-03-rosado.png", aliases: ["marron"] },
       { id: "rojo", colorName: "Rojo", colorHex: "#B31625", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-04-rojo.png" },
       { id: "verde", colorName: "Verde", colorHex: "#24483F", image: "assets/productos/vyore/variantes/blusa-suplex-amarre/blusa-suplex-amarre-05-verde.png" },
@@ -67,8 +67,16 @@
   };
 
 
-  const SPECIAL_MAIN_IMAGES = {
-    "olimpico-suplex": "assets/productos/vyore/olimpico-suplex.png",
+  const REFERENCE_IMAGE_DIR = "assets/productos/vyore/variantes/IMAGENES-REFERENCIALES";
+  const REFERENCE_IMAGES = {
+    "suplex-amarre-hebilla": `${REFERENCE_IMAGE_DIR}/suplex-amarre-hebilla.png`,
+    "olimpico-suplex": `${REFERENCE_IMAGE_DIR}/olimpico-suplex.png`,
+    "suplex-lazzo-doble-forro": `${REFERENCE_IMAGE_DIR}/suplex-lazzo-doble-forro.png`,
+    "suplex-corset": `${REFERENCE_IMAGE_DIR}/suplex-corset.png`,
+    "suplex-doble-forro": `${REFERENCE_IMAGE_DIR}/suplex-doble-forro.png`,
+    "blusa-suplex": `${REFERENCE_IMAGE_DIR}/blusa-suplex.png`,
+    "blusa-brodery-copa": `${REFERENCE_IMAGE_DIR}/blusa-brodery-copa.png`,
+    "blusa-suplex-amarre": `${REFERENCE_IMAGE_DIR}/blusa-suplex-amarre.png`,
   };
 
   function normalize(text) {
@@ -106,6 +114,11 @@
   function cleanPath(value, fallback = FALLBACK_IMAGE) {
     const path = String(value || "").trim().replace(/\\/g, "/");
     return path || fallback;
+  }
+
+  function referenceImageFor(value) {
+    const id = slugify(value);
+    return REFERENCE_IMAGES[id] || "";
   }
 
   function colorCode(colorId, colorName) {
@@ -185,10 +198,7 @@
     const modelId = isSpecialModel(rawModelId, copy.imagen || copy.mainImage || copy.image);
     if (!SPECIAL_VARIANTS[modelId]) return copy;
 
-    if (SPECIAL_MAIN_IMAGES[modelId]) {
-      copy.imagen = SPECIAL_MAIN_IMAGES[modelId];
-      copy.mainImage = SPECIAL_MAIN_IMAGES[modelId];
-    }
+    copy.referenceImage = cleanPath(copy.referenceImage || referenceImageFor(modelId), "");
 
     copy.variantes = SPECIAL_VARIANTS[modelId].map((canonical) => {
       const stored = findStoredVariant(canonical, variants) || {};
@@ -217,10 +227,7 @@
       copy.imagen = canonical.image;
       copy.image = canonical.image;
     }
-    if (SPECIAL_MAIN_IMAGES[modelId]) {
-      copy.modelImage = SPECIAL_MAIN_IMAGES[modelId];
-      copy.mainImage = copy.mainImage || SPECIAL_MAIN_IMAGES[modelId];
-    }
+    copy.referenceImage = cleanPath(copy.referenceImage || referenceImageFor(modelId), "");
     return copy;
   }
 
@@ -231,6 +238,7 @@
     const modelName = product.modelName || product.modelo || product.parentName || stripColorSuffix(product.nombre, colorName) || product.nombre || "Producto";
     const modelId = slugify(product.modelId || product.parentId || product.groupId || product.modelSlug || modelName);
     const modelSlug = product.modelSlug || modelId;
+    const referenceImage = cleanPath(product.referenceImage || product.modelReferenceImage || referenceImageFor(modelSlug) || referenceImageFor(modelId), "");
     const sku = String(product.sku || product.codigo || skuFor(product.baseSku || product.modelSku || modelId, colorId, colorName)).trim();
     const image = cleanPath(product.imagen || product.image || product.variantImage || product.mainImage || product.modelImage);
     const modelImage = cleanPath(product.modelImage || product.coverImage || product.mainImage || image);
@@ -268,6 +276,7 @@
       image,
       mainImage: image,
       modelImage,
+      referenceImage,
       destacado: isFeatured,
       featured: isFeatured,
       nuevo: isNew,
@@ -284,6 +293,7 @@
     const modelId = product.id || product.slug || slugify(product.nombre || product.sku || "producto");
     const modelName = product.nombre || titleFromSlug(modelId);
     const modelImage = cleanPath(product.mainImage || product.imagen || product.image);
+    const referenceImage = cleanPath(product.referenceImage || referenceImageFor(product.slug || modelId), "");
     const sku = normalized.sku || skuFor(product.sku || modelId, normalized.id, normalized.colorName);
     return normalizeSkuProduct({
       id: `${modelId}-${normalized.id}`,
@@ -309,6 +319,7 @@
       image: normalized.image,
       mainImage: normalized.image,
       modelImage,
+      referenceImage,
       destacado: product.destacado ?? product.featured,
       featured: product.featured ?? product.destacado,
       nuevo: product.nuevo ?? product.newArrival,
@@ -329,12 +340,20 @@
     return [normalizeSkuProduct(product)];
   }
 
+  function skuProductIdentity(product = {}) {
+    const normalized = product.modelId && product.colorId ? product : normalizeSkuProduct(product);
+    const modelId = slugify(normalized.modelId || normalized.modelSlug || normalized.modelName || normalized.nombre || normalized.id || normalized.sku);
+    const colorId = slugify(normalized.colorId || normalized.colorName || normalized.color || normalized.id || normalized.sku);
+    return `${modelId}::${colorId}`;
+  }
+
   function mergeCatalog(baseRecords = [], storedRecords = []) {
     const merged = new Map();
     const put = (item) => {
-      const key = item.id || item.sku;
+      const normalized = normalizeSkuProduct(item);
+      const key = skuProductIdentity(normalized);
       const current = merged.get(key) || {};
-      merged.set(key, normalizeSkuProduct({ ...current, ...item }));
+      merged.set(key, normalizeSkuProduct({ ...current, ...normalized }));
     };
     baseRecords.flatMap(expandRecord).forEach(put);
     storedRecords.flatMap(expandRecord).forEach(put);
@@ -371,7 +390,36 @@
       featured: Boolean(product.featured ?? product.destacado),
       nuevo: Boolean(product.nuevo ?? product.newArrival),
       newArrival: Boolean(product.newArrival ?? product.nuevo),
+      sortOrder: Number.isFinite(Number(product.sortOrder)) ? Number(product.sortOrder) : 99,
     };
+  }
+  function variantKey(variant = {}) {
+    return slugify(variant.colorId || variant.id || variant.colorName || variant.sku || "color");
+  }
+
+  function mergeVariant(current, incoming) {
+    const sortOrder = current.sortOrder ?? incoming.sortOrder ?? 99;
+    return {
+      ...current,
+      ...incoming,
+      id: incoming.id || current.id,
+      colorId: incoming.colorId || incoming.id || current.colorId || current.id,
+      colorName: incoming.colorName || current.colorName,
+      colorHex: incoming.colorHex || current.colorHex,
+      sortOrder,
+    };
+  }
+
+  function upsertVariant(group, variant) {
+    const key = variantKey(variant);
+    const index = group.variantes.findIndex((item) => variantKey(item) === key);
+    if (index === -1) {
+      group.variantes.push(variant);
+      return variant;
+    }
+    const merged = mergeVariant(group.variantes[index], variant);
+    group.variantes[index] = merged;
+    return merged;
   }
 
   function groupProducts(skuProducts = []) {
@@ -396,6 +444,7 @@
         disponibilidad: "agotado",
         imagen: product.modelImage || product.imagen,
         mainImage: product.modelImage || product.imagen,
+        referenceImage: product.referenceImage || referenceImageFor(product.modelSlug || groupId) || product.modelImage || product.imagen,
         destacado: false,
         featured: false,
         nuevo: false,
@@ -413,14 +462,15 @@
       group.precioAlumno = Math.min(group.precioAlumno, product.precioAlumno);
       group.featured = group.destacado = group.featured || product.featured;
       group.newArrival = group.nuevo = group.newArrival || product.newArrival;
-      group.variantes.push(variant);
+      group.referenceImage = group.referenceImage || product.referenceImage || referenceImageFor(product.modelSlug || groupId);
+      const mergedVariant = upsertVariant(group, variant);
 
       if (product.featured && !group.featuredVariantId) {
-        group.featuredVariantId = variant.id;
-        group.featuredSku = variant.sku;
-        group.featuredImage = variant.image;
-        group.imagen = variant.image || group.imagen;
-        group.mainImage = variant.image || group.mainImage;
+        group.featuredVariantId = mergedVariant.id;
+        group.featuredSku = mergedVariant.sku;
+        group.featuredImage = mergedVariant.image;
+        group.imagen = mergedVariant.image || group.imagen;
+        group.mainImage = mergedVariant.image || group.mainImage;
       }
 
       const knownStock = group.variantes.map((variant) => parseStock(variant.stock));
@@ -432,11 +482,7 @@
     });
 
     return Array.from(groups.values()).map((group) => {
-      group.variantes.sort((a, b) => {
-        const productA = skuProducts.find((product) => product.id === a.skuProductId);
-        const productB = skuProducts.find((product) => product.id === b.skuProductId);
-        return (productA?.sortOrder ?? 99) - (productB?.sortOrder ?? 99) || a.colorName.localeCompare(b.colorName, "es");
-      });
+      group.variantes.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99) || a.colorName.localeCompare(b.colorName, "es"));
       if (!group.featuredVariantId && group.featured) {
         const variant = group.variantes.find((item) => item.featured) || group.variantes[0];
         group.featuredVariantId = variant?.id || null;
@@ -513,5 +559,6 @@
     productAvailability,
     cartKeyForSku,
     resolveCartEntry,
+    referenceImageFor,
   };
 })();

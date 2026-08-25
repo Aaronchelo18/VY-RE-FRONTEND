@@ -358,3 +358,44 @@
     text-align: left;
   }
 }
+/* VYORE alert color correction */
+.vyore-alert-root {
+  background: rgba(23, 23, 23, .42);
+}
+
+.vyore-alert {
+  border: 1px solid rgba(104, 45, 66, .12);
+  background: #FAF7F2;
+  box-shadow: 0 24px 70px rgba(42, 32, 27, .22);
+}
+
+.vyore-alert-icon,
+.vyore-alert-success .vyore-alert-icon,
+.vyore-alert-error .vyore-alert-icon,
+.vyore-alert-warning .vyore-alert-icon,
+.vyore-alert-info .vyore-alert-icon {
+  border-color: #682D42;
+  color: #682D42;
+}
+
+.vyore-alert h2 {
+  color: #171717;
+}
+
+.vyore-alert p,
+.vyore-alert-message {
+  color: #6f6863;
+}
+
+.vyore-alert-confirm,
+.vyore-alert-success .vyore-alert-confirm,
+.vyore-alert-info .vyore-alert-confirm,
+.vyore-alert-error .vyore-alert-confirm {
+  background: #682D42;
+  color: #fff;
+}
+
+.vyore-alert-cancel {
+  background: #EFE6E3;
+  color: #682D42;
+}
