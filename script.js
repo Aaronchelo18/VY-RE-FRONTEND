@@ -1,10 +1,11 @@
-const STORAGE_KEYS = {
+﻿const STORAGE_KEYS = {
   cart: "vyore_cart",
   adminProducts: "vyore_admin_products",
 };
 
 const META = window.VYORE_CATALOG_META || {};
-const BASE_PRODUCTS = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : [];
+let BASE_PRODUCTS = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : [];
+let CATALOG_SOURCE = "fallback";
 let SKU_PRODUCTS = buildSkuProducts();
 let PRODUCTS = buildProducts();
 const FIT_ARRIVAL_SLUGS = new Set(["suplex-corset", "suplex-doble-forro"]);
@@ -94,6 +95,7 @@ function slugify(text) {
 }
 
 function loadAdminProducts() {
+  if (CATALOG_SOURCE === "supabase") return [];
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.adminProducts) || "[]");
     return Array.isArray(stored) ? stored : [];
@@ -892,8 +894,20 @@ window.addEventListener("storage", (event) => {
   }
 });
 
-refreshCatalogFromStorage();
-bootHashProduct();
+async function bootstrapCatalog() {
+  const fallbackProducts = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : BASE_PRODUCTS;
+  if (window.VyoreSupabase?.resolveCatalog) {
+    const catalog = await window.VyoreSupabase.resolveCatalog({ fallbackProducts });
+    BASE_PRODUCTS = catalog.baseProducts;
+    SKU_PRODUCTS = catalog.skuProducts;
+    PRODUCTS = catalog.products;
+    CATALOG_SOURCE = catalog.source;
+  }
+  refreshCatalogFromStorage();
+  bootHashProduct();
+}
+
+bootstrapCatalog();
 
 
 

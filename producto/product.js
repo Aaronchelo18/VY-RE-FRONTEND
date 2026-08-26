@@ -1,25 +1,11 @@
 const STORAGE_KEYS = { cart: "vyore_cart", adminProducts: "vyore_admin_products" };
-const META = window.VYORE_CATALOG_META || {};
-const BASE_PRODUCTS = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : [];
-const SKU_PRODUCTS = window.VyoreCatalog
-  ? window.VyoreCatalog.mergeCatalog(BASE_PRODUCTS, loadAdminProducts()).filter((item) => item.active !== false)
-  : mergeProducts(BASE_PRODUCTS, loadAdminProducts()).filter((item) => item.active !== false);
-const PRODUCTS = window.VyoreCatalog ? window.VyoreCatalog.groupProducts(SKU_PRODUCTS) : SKU_PRODUCTS;
-const money = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN", minimumFractionDigits: 2 });
-
-const params = new URLSearchParams(window.location.search);
-const slug = params.get("slug") || window.location.hash.replace(/^#/, "");
-const product = PRODUCTS.find((item) => item.slug === slug || item.id === slug) || PRODUCTS[0];
-const requestedVariantId = params.get("color") || params.get("variant") || params.get("sku") || null;
-const requestedVariant = product?.variantes?.find((variant) => variant.id === requestedVariantId || variant.colorId === requestedVariantId || variant.sku === requestedVariantId) || null;
-const initialVariant =
-  (requestedVariant && availability(requestedVariant).canBuy ? requestedVariant : null) ||
-  product?.variantes?.find((variant) => availability(variant).canBuy) ||
-  product?.variantes?.[0];
-const state = { selectedVariantId: initialVariant?.id || null };
-const productSlug = product?.slug || product?.id;
-if (productSlug === "blusa-suplex") document.body.classList.add("product-page--blusa-suplex");
-if (productSlug === "blusa-suplex-amarre") document.body.classList.add("product-page--blusa-suplex-amarre");
+let META = window.VYORE_CATALOG_META || {};
+let BASE_PRODUCTS = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : [];
+let CATALOG_SOURCE = "fallback";
+let SKU_PRODUCTS = [];
+let PRODUCTS = [];
+let product = null;
+const state = { selectedVariantId: null };
 
 const image = document.querySelector("#productImage");
 const category = document.querySelector("#productCategory");
@@ -361,6 +347,7 @@ function normalizeProduct(item) {
   return base;
 }
 function loadAdminProducts() {
+  if (CATALOG_SOURCE === "supabase") return [];
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.adminProducts) || "[]");
     return Array.isArray(stored) ? stored : [];
@@ -530,9 +517,15 @@ function syncVariant() {
     button.classList.toggle("is-selected", button.dataset.variantId === variant.id);
   });
 }
-if (!product) {
-  window.location.href = "../#productos";
-} else {
+function renderProductPage() {
+  if (!product) {
+    window.location.href = "../#productos";
+    return;
+  }
+
+  const productSlug = product.slug || product.id;
+  document.body.classList.toggle("product-page--blusa-suplex", productSlug === "blusa-suplex");
+  document.body.classList.toggle("product-page--blusa-suplex-amarre", productSlug === "blusa-suplex-amarre");
   document.title = `${product.nombre} | VYÓRE`;
   category.textContent = product.categoria;
   nameNode.textContent = product.nombre;
@@ -546,6 +539,42 @@ if (!product) {
   renderHeaderCartCount();
 }
 
+async function hydrateCatalog() {
+  const fallbackProducts = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : BASE_PRODUCTS;
+  if (window.VyoreSupabase?.resolveCatalog) {
+    const catalog = await window.VyoreSupabase.resolveCatalog({ fallbackProducts });
+    BASE_PRODUCTS = catalog.baseProducts;
+    SKU_PRODUCTS = catalog.skuProducts;
+    PRODUCTS = catalog.products;
+    CATALOG_SOURCE = catalog.source;
+    META = { ...META, ...(catalog.meta || {}) };
+    return;
+  }
+  SKU_PRODUCTS = window.VyoreCatalog
+    ? window.VyoreCatalog.mergeCatalog(BASE_PRODUCTS, loadAdminProducts()).filter((item) => item.active !== false)
+    : mergeProducts(BASE_PRODUCTS, loadAdminProducts()).filter((item) => item.active !== false);
+  PRODUCTS = window.VyoreCatalog ? window.VyoreCatalog.groupProducts(SKU_PRODUCTS) : SKU_PRODUCTS;
+}
+
+function selectProductFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get("slug") || window.location.hash.replace(/^#/, "");
+  product = PRODUCTS.find((item) => item.slug === slug || item.id === slug) || PRODUCTS[0] || null;
+  const requestedVariantId = params.get("color") || params.get("variant") || params.get("sku") || null;
+  const requestedVariant = product?.variantes?.find((variant) => variant.id === requestedVariantId || variant.colorId === requestedVariantId || variant.sku === requestedVariantId) || null;
+  const initialVariant =
+    (requestedVariant && availability(requestedVariant).canBuy ? requestedVariant : null) ||
+    product?.variantes?.find((variant) => availability(variant).canBuy) ||
+    product?.variantes?.[0];
+  state.selectedVariantId = initialVariant?.id || null;
+}
+
+async function bootstrapProductPage() {
+  await hydrateCatalog();
+  selectProductFromUrl();
+  renderProductPage();
+}
+
 productMenuToggle?.addEventListener("click", toggleProductMenu);
 productMenuBackdrop?.addEventListener("click", closeProductMenu);
 productMainNav?.addEventListener("click", closeProductMenu);
@@ -555,6 +584,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 addToCartButton.addEventListener("click", () => {
+  if (!product) return;
   const variant = selectedVariant();
   const stateInfo = availability(variant);
   if (!stateInfo.canBuy) return;
@@ -581,3 +611,5 @@ addToCartButton.addEventListener("click", () => {
   renderHeaderCartCount();
   syncVariant();
 });
+
+bootstrapProductPage();

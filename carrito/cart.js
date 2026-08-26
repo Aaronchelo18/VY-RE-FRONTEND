@@ -3,12 +3,11 @@ const STORAGE_KEYS = {
   adminProducts: "vyore_admin_products",
 };
 
-const META = window.VYORE_CATALOG_META || {};
-const BASE_PRODUCTS = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : [];
-const SKU_PRODUCTS = window.VyoreCatalog
-  ? window.VyoreCatalog.mergeCatalog(BASE_PRODUCTS, loadAdminProducts()).filter((item) => item.active !== false)
-  : mergeProducts(BASE_PRODUCTS, loadAdminProducts()).filter((item) => item.active !== false);
-const PRODUCTS = window.VyoreCatalog ? window.VyoreCatalog.groupProducts(SKU_PRODUCTS) : SKU_PRODUCTS;
+let META = window.VYORE_CATALOG_META || {};
+let BASE_PRODUCTS = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : [];
+let CATALOG_SOURCE = "fallback";
+let SKU_PRODUCTS = [];
+let PRODUCTS = [];
 
 const state = { cart: loadCart() };
 
@@ -364,6 +363,7 @@ function normalizeProduct(product) {
 }
 
 function loadAdminProducts() {
+  if (CATALOG_SOURCE === "supabase") return [];
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.adminProducts) || "[]");
     return Array.isArray(stored) ? stored : [];
@@ -585,6 +585,22 @@ sendWhatsapp.addEventListener("click", (event) => {
   }
 });
 
-render();
+async function bootstrapCart() {
+  const fallbackProducts = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : BASE_PRODUCTS;
+  if (window.VyoreSupabase?.resolveCatalog) {
+    const catalog = await window.VyoreSupabase.resolveCatalog({ fallbackProducts });
+    BASE_PRODUCTS = catalog.baseProducts;
+    SKU_PRODUCTS = catalog.skuProducts;
+    PRODUCTS = catalog.products;
+    CATALOG_SOURCE = catalog.source;
+    META = { ...META, ...(catalog.meta || {}) };
+  } else {
+    SKU_PRODUCTS = window.VyoreCatalog
+      ? window.VyoreCatalog.mergeCatalog(BASE_PRODUCTS, loadAdminProducts()).filter((item) => item.active !== false)
+      : mergeProducts(BASE_PRODUCTS, loadAdminProducts()).filter((item) => item.active !== false);
+    PRODUCTS = window.VyoreCatalog ? window.VyoreCatalog.groupProducts(SKU_PRODUCTS) : SKU_PRODUCTS;
+  }
+  render();
+}
 
-
+bootstrapCart();

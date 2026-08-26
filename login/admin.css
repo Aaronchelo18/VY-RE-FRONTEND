@@ -1253,3 +1253,542 @@ body.admin-mode .featured-cell input:disabled {
   cursor: not-allowed;
   opacity: .42;
 }
+
+/* VYORE refined admin layout */
+body.admin-mode {
+  --admin-sidebar-width: 12.5rem;
+  --admin-sidebar-collapsed-width: 4.75rem;
+  background: #f6f4f1;
+  color: #191817;
+  font-family: Inter, "Nunito", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+body.admin-mode #wrapper {
+  padding-left: var(--admin-sidebar-width);
+}
+
+body.admin-mode.sidebar-toggled #wrapper,
+body.admin-mode.sidebar-collapsed #wrapper {
+  padding-left: var(--admin-sidebar-collapsed-width);
+}
+
+body.admin-mode .sidebar {
+  width: var(--admin-sidebar-width) !important;
+  padding: .75rem .65rem;
+  background: #5d3044 !important;
+  box-shadow: 8px 0 22px rgba(25, 24, 23, .10);
+}
+
+body.admin-mode .sidebar.toggled {
+  width: var(--admin-sidebar-collapsed-width) !important;
+  padding-right: .5rem;
+  padding-left: .5rem;
+}
+
+body.admin-mode .sidebar .sidebar-brand {
+  height: 4.6rem;
+  padding: 0 .45rem;
+  border-bottom-color: rgba(255, 255, 255, .13);
+}
+
+body.admin-mode .sidebar-brand-icon {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+body.admin-mode .sidebar-brand-icon img {
+  width: 27px;
+  height: 27px;
+}
+
+body.admin-mode .sidebar .sidebar-brand-text {
+  margin-left: .65rem !important;
+  color: #fff;
+  font-size: .88rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+
+body.admin-mode .sidebar-dark .sidebar-heading {
+  margin: .9rem .75rem .35rem;
+  color: rgba(255, 255, 255, .52);
+  font-size: .66rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+
+body.admin-mode .sidebar .nav-item .nav-link {
+  display: flex;
+  align-items: center;
+  gap: .72rem;
+  width: 100%;
+  min-height: 42px;
+  margin: .1rem 0;
+  border-radius: 8px;
+  padding: .68rem .78rem;
+  color: rgba(255, 255, 255, .78);
+  font-size: .92rem;
+  font-weight: 500;
+}
+
+body.admin-mode .sidebar .nav-item .nav-link i {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  margin-right: 0;
+  color: rgba(255, 255, 255, .64);
+  font-size: .95rem;
+}
+
+body.admin-mode .sidebar .nav-item.active > .nav-link,
+body.admin-mode .sidebar .sidebar-link.active,
+body.admin-mode .sidebar .sidebar-link:hover,
+body.admin-mode .sidebar .logout-action:hover {
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  box-shadow: inset 3px 0 0 #c9ab57;
+}
+
+body.admin-mode .sidebar .nav-item.active > .nav-link i,
+body.admin-mode .sidebar .sidebar-link.active i,
+body.admin-mode .sidebar .sidebar-link:hover i {
+  color: #fff;
+}
+
+body.admin-mode .sidebar.toggled .sidebar-brand-text,
+body.admin-mode .sidebar.toggled .sidebar-heading,
+body.admin-mode .sidebar.toggled .nav-link span,
+body.admin-mode .sidebar.toggled .logout-action span {
+  display: none;
+}
+
+body.admin-mode .sidebar.toggled .sidebar-brand,
+body.admin-mode .sidebar.toggled .nav-item .nav-link {
+  justify-content: center !important;
+}
+
+body.admin-mode .sidebar.toggled .nav-item .nav-link {
+  width: 44px;
+  min-height: 44px;
+  margin-right: auto;
+  margin-left: auto;
+  padding: 0;
+}
+
+body.admin-mode .sidebar.toggled .nav-item .nav-link i {
+  width: auto;
+  font-size: 1rem;
+}
+
+body.admin-mode .sidebar #sidebarToggle {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: rgba(255, 255, 255, .84);
+  background: rgba(255, 255, 255, .15);
+}
+
+body.admin-mode .sidebar #sidebarToggle::after {
+  display: none;
+}
+
+body.admin-mode .sidebar-logout-item {
+  margin-top: auto;
+  margin-bottom: .25rem;
+}
+
+body.admin-mode #content-wrapper {
+  background: #f6f4f1;
+}
+
+body.admin-mode .admin-topbar {
+  top: .75rem;
+  min-height: 5.7rem;
+  margin: .85rem 1.5rem 1.25rem !important;
+  padding: .75rem 1.4rem;
+  border: 1px solid rgba(25, 24, 23, .08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .96) !important;
+}
+
+body.admin-mode .topbar-title h1 {
+  font-size: clamp(1.7rem, 2.4vw, 2.35rem);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+body.admin-mode .eyebrow,
+body.admin-mode .text-xs,
+body.admin-mode .product-form label,
+body.admin-mode .admin-toolbar label,
+body.admin-mode .login-form label {
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+body.admin-mode .topbar-title p:last-child,
+body.admin-mode .profile-copy span {
+  font-weight: 500;
+}
+
+body.admin-mode .admin-profile {
+  min-width: min(100%, 300px);
+  padding: .55rem .7rem;
+  border-color: rgba(25, 24, 23, .09);
+}
+
+body.admin-mode .profile-copy strong,
+body.admin-mode .sku-code,
+body.admin-mode .product-name-readonly,
+body.admin-mode .price-readonly,
+body.admin-mode .stock-readonly {
+  font-weight: 600;
+}
+
+body.admin-mode .vyore-admin-content {
+  padding: 0 1.5rem 2rem;
+}
+
+body.admin-mode .summary-grid {
+  margin-bottom: .45rem;
+}
+
+body.admin-mode .summary-card {
+  min-height: 96px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+body.admin-mode .summary-card .card-body {
+  padding: 1rem 1.05rem;
+}
+
+.product-create-panel {
+  background: #fff;
+}
+
+.product-create-panel > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.35rem;
+  padding: 0 1.1rem;
+  list-style: none;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+}
+
+.product-create-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.product-create-panel[open] > summary {
+  border-bottom-color: rgba(25, 24, 23, .08);
+}
+
+.summary-title {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  color: #5d3044;
+  font-size: .96rem;
+  font-weight: 600;
+}
+
+.summary-chevron {
+  color: #736c68;
+  transition: transform .16s ease;
+}
+
+.product-create-panel[open] .summary-chevron {
+  transform: rotate(180deg);
+}
+
+body.admin-mode .primary-action,
+body.admin-mode .secondary-action,
+body.admin-mode .danger-action {
+  gap: .5rem;
+  border-radius: 7px;
+  font-weight: 600;
+}
+
+body.admin-mode .form-control,
+body.admin-mode .admin-product-table input,
+body.admin-mode .admin-product-table select {
+  border-color: rgba(25, 24, 23, .13);
+  font-weight: 400;
+}
+
+body.admin-mode .table-shell .card-header {
+  min-height: 3.4rem;
+}
+
+body.admin-mode .admin-product-table {
+  width: 100%;
+  min-width: 1040px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: .86rem;
+}
+
+body.admin-mode .admin-product-table thead th {
+  border-top: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
+  background: #292627;
+  color: #fff;
+  font-size: .69rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+
+body.admin-mode .admin-product-table th:nth-child(1) { width: 126px; }
+body.admin-mode .admin-product-table th:nth-child(2) { width: 230px; }
+body.admin-mode .admin-product-table th:nth-child(3) { width: 170px; }
+body.admin-mode .admin-product-table th:nth-child(4) { width: 108px; }
+body.admin-mode .admin-product-table th:nth-child(5) { width: 104px; }
+body.admin-mode .admin-product-table th:nth-child(6) { width: 78px; }
+body.admin-mode .admin-product-table th:nth-child(7) { width: 116px; }
+body.admin-mode .admin-product-table th:nth-child(8) { width: 112px; }
+body.admin-mode .admin-product-table th:nth-child(9) { width: 118px; }
+
+body.admin-mode .admin-product-table td {
+  padding: .72rem .75rem;
+  border-top: 1px solid rgba(25, 24, 23, .07);
+  background: #fff;
+  font-weight: 400;
+}
+
+body.admin-mode .admin-product-table tbody tr:nth-child(even) td {
+  background: #faf8f5;
+}
+
+body.admin-mode .admin-product-table tbody tr:hover td {
+  background: #fffaf2;
+}
+
+body.admin-mode .image-cell {
+  min-width: 0;
+}
+
+body.admin-mode .image-editor {
+  grid-template-columns: 54px minmax(120px, 1fr);
+}
+
+body.admin-mode .image-editor.image-only {
+  display: flex;
+  justify-content: center;
+}
+
+body.admin-mode .product-thumb {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  background: #fffdf9;
+}
+
+body.admin-mode .color-display strong,
+body.admin-mode .category-pill,
+body.admin-mode .status-pill,
+body.admin-mode .feature-badge {
+  font-weight: 500;
+}
+
+body.admin-mode .feature-badge {
+  gap: .4rem;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 .65rem;
+}
+
+body.admin-mode .feature-badge.active {
+  background: #fff7dc;
+  color: #765a15;
+}
+
+body.admin-mode .actions-cell {
+  position: sticky;
+  right: 0;
+  background: inherit;
+}
+
+body.admin-mode .row-actions {
+  justify-content: flex-end;
+  gap: .42rem;
+}
+
+body.admin-mode .row-action {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  gap: 0;
+  padding: 0;
+  border-radius: 7px;
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+body.admin-mode .row-action.edit,
+body.admin-mode .row-action.cancel {
+  color: #5d3044;
+}
+
+body.admin-mode .row-action.delete {
+  color: #a23247;
+}
+
+body.admin-mode .row-action.save {
+  color: #2f6f3d;
+}
+
+body.admin-mode .sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (max-width: 991.98px) {
+  body.admin-mode .admin-topbar {
+    margin: .75rem .9rem 1rem !important;
+  }
+
+  body.admin-mode .vyore-admin-content {
+    padding-right: .9rem;
+    padding-left: .9rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  body.admin-mode #wrapper,
+  body.admin-mode.sidebar-toggled #wrapper,
+  body.admin-mode.sidebar-collapsed #wrapper {
+    padding-left: 0;
+  }
+
+  body.admin-mode .sidebar,
+  body.admin-mode .sidebar.toggled {
+    position: sticky !important;
+    top: 0;
+    z-index: 1030;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    width: 100% !important;
+    min-height: 64px;
+    padding: .55rem .75rem;
+  }
+
+  body.admin-mode .sidebar .sidebar-brand {
+    height: auto;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  body.admin-mode .sidebar .sidebar-brand-text,
+  body.admin-mode .sidebar-dark .sidebar-heading,
+  body.admin-mode .sidebar .sidebar-divider,
+  body.admin-mode .sidebar .text-center,
+  body.admin-mode .sidebar .nav-link span,
+  body.admin-mode .sidebar .logout-action span {
+    display: none !important;
+  }
+
+  body.admin-mode .sidebar .nav-item {
+    margin: 0 .2rem;
+  }
+
+  body.admin-mode .sidebar .nav-item .nav-link,
+  body.admin-mode .sidebar.toggled .nav-item .nav-link {
+    width: 42px;
+    min-height: 42px;
+    margin: 0;
+    padding: 0;
+    justify-content: center !important;
+  }
+
+  body.admin-mode .sidebar-logout-item {
+    margin: 0 0 0 auto;
+  }
+
+  body.admin-mode .admin-topbar {
+    position: static;
+    min-height: auto;
+    margin: .75rem .75rem 1rem !important;
+    padding: .85rem;
+  }
+
+  body.admin-mode .topbar-title h1 {
+    font-size: 1.55rem;
+  }
+
+  body.admin-mode .admin-profile {
+    padding: .35rem;
+  }
+
+  body.admin-mode .admin-product-table,
+  body.admin-mode .admin-product-table tbody,
+  body.admin-mode .admin-product-table tr,
+  body.admin-mode .admin-product-table td {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  body.admin-mode .admin-product-table {
+    table-layout: auto;
+  }
+
+  body.admin-mode .admin-product-table thead {
+    display: none;
+  }
+
+  body.admin-mode .admin-product-table tbody tr {
+    display: grid;
+    gap: .55rem;
+    padding: .95rem;
+    border-bottom: 1px solid rgba(25, 24, 23, .08);
+    background: #fff;
+  }
+
+  body.admin-mode .admin-product-table td {
+    display: grid;
+    grid-template-columns: minmax(88px, .36fr) minmax(0, 1fr);
+    align-items: center;
+    gap: .75rem;
+    padding: 0;
+    border-top: 0;
+    background: transparent !important;
+  }
+
+  body.admin-mode .inventory-empty::before {
+    display: none;
+  }
+  body.admin-mode .admin-product-table td::before {
+    content: attr(data-label);
+    color: #756f6b;
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  body.admin-mode .actions-cell {
+    position: static;
+  }
+
+  body.admin-mode .row-actions {
+    justify-content: flex-start;
+  }
+}
+/* End VYORE refined admin layout */

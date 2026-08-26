@@ -116,6 +116,10 @@
     return path || fallback;
   }
 
+  function isReferenceImage(value) {
+    const path = cleanPath(value, "");
+    return path.includes(`${REFERENCE_IMAGE_DIR}/`);
+  }
   function referenceImageFor(value) {
     const id = slugify(value);
     return REFERENCE_IMAGES[id] || "";
@@ -559,6 +563,7 @@
     productAvailability,
     cartKeyForSku,
     resolveCartEntry,
+    isReferenceImage,
     referenceImageFor,
   };
 })();

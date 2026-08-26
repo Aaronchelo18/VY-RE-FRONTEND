@@ -7,7 +7,7 @@ const AUTH_SESSION_MS = 1000 * 60 * 60 * 8;
 const AUTH_USERS = [
   {
     username: "admin",
-    displayName: "Jozef Aarón López Díaz",
+    displayName: "Jozef Aar\u00f3n L\u00f3pez D\u00edaz",
     role: "Administrador",
     passwordHash: "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
     active: true,
@@ -16,6 +16,28 @@ const AUTH_USERS = [
 
 const baseMeta = window.VYORE_CATALOG_META || {};
 const baseProducts = Array.isArray(window.PRODUCTOS_VYORE) ? window.PRODUCTOS_VYORE : [];
+const REFERENCE_IMAGE_TOKEN = "IMAGENES-REFERENCIALES/";
+const PLACEHOLDER_COLOR_IDS = new Set(["color-por-confirmar", "por-confirmar"]);
+
+function colorSlug(value) {
+  return slugify(String(value || ""));
+}
+
+function hasPlaceholderColor(...values) {
+  const slugs = values.map(colorSlug).filter(Boolean);
+  return !slugs.length || slugs.some((item) => PLACEHOLDER_COLOR_IDS.has(item));
+}
+
+function isReferenceImagePath(value) {
+  const path = String(value || "").trim().replace(/\\/g, "/");
+  return Boolean(window.VyoreCatalog?.isReferenceImage?.(path) || path.includes(REFERENCE_IMAGE_TOKEN));
+}
+
+function isReferenceOnlyRecord(record = {}) {
+  if (!record || typeof record !== "object") return false;
+  const image = record.imagen || record.image || record.variantImage || "";
+  return isReferenceImagePath(image) || hasPlaceholderColor(record.colorId, record.colorName, record.color, record.nombreColor);
+}
 const baseCatalogProducts = cleanProductList(mergeCatalogRecords(baseProducts, []), { includeInactive: true });
 const baseProductKeys = new Set(baseCatalogProducts.map(productIdentityKey));
 sanitizeStoredProducts();
@@ -26,6 +48,8 @@ let search = "";
 let dirty = false;
 let activeView = "productos";
 let activeSession = null;
+let adminCatalogSource = "fallback";
+let remoteCatalogMeta = null;
 
 const loginPanel = document.querySelector("#loginPanel");
 const adminPanel = document.querySelector("#adminPanel");
@@ -81,17 +105,27 @@ function authUserKey(value) {
 }
 
 async function hashText(value) {
-  if (!window.crypto?.subtle) throw new Error("La verificación segura no está disponible en este navegador.");
+  if (!window.crypto?.subtle) throw new Error("La verificaci\u00f3n segura no est\u00e1 disponible en este navegador.");
   const bytes = new TextEncoder().encode(String(value));
   const digest = await window.crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest)).map((item) => item.toString(16).padStart(2, "0")).join("");
 }
 
 async function verifyCredentials(username, password) {
+  if (window.VyoreSupabase?.isConfigured?.() && String(username || "").includes("@")) {
+    const authUser = await window.VyoreSupabase.signIn(username, password);
+    return {
+      username: authUser.email || username,
+      displayName: authUser.user_metadata?.display_name || authUser.email || username,
+      role: authUser.user_metadata?.role || "Administrador",
+      provider: "supabase",
+    };
+  }
+
   const user = AUTH_USERS.find((item) => item.active && authUserKey(item.username) === authUserKey(username));
   if (!user) return null;
   const passwordHash = await hashText(password);
-  return passwordHash === user.passwordHash ? user : null;
+  return passwordHash === user.passwordHash ? { ...user, provider: "local" } : null;
 }
 
 function randomToken() {
@@ -110,6 +144,7 @@ function createSession(user) {
     username: user.username,
     displayName: user.displayName || user.username,
     role: user.role || "Administrador",
+    provider: user.provider || "local",
     issuedAt: now,
     expiresAt: now + AUTH_SESSION_MS,
   };
@@ -132,8 +167,9 @@ function loadSession() {
   try {
     const session = JSON.parse(localStorage.getItem(AUTH_SESSION_KEY) || "null");
     if (!session || !session.token || !session.username || !session.expiresAt) return null;
+    const isSupabaseSession = session.provider === "supabase" && window.VyoreSupabase?.isConfigured?.();
     const user = AUTH_USERS.find((item) => item.active && item.username === session.username);
-    if (!user || Number(session.expiresAt) <= Date.now()) {
+    if ((!isSupabaseSession && !user) || Number(session.expiresAt) <= Date.now()) {
       clearSession();
       return null;
     }
@@ -149,7 +185,7 @@ function requireSession(showExpiredMessage = false) {
   const session = loadSession();
   if (session) return session;
   showLogin();
-  if (showExpiredMessage) notify({ type: "warning", title: "Sesión vencida", text: "Ingresa nuevamente para continuar." });
+  if (showExpiredMessage) notify({ type: "warning", title: "Sesi\u00f3n vencida", text: "Ingresa nuevamente para continuar." });
   return null;
 }
 
@@ -178,8 +214,13 @@ function setSidebarCollapsed(collapsed, persist = true) {
     if (!toggle) return;
     const expanded = !isCollapsed;
     toggle.setAttribute("aria-expanded", String(expanded));
-    toggle.setAttribute("aria-label", expanded ? "Contraer menu" : "Expandir menu");
-    toggle.title = expanded ? "Contraer menu" : "Expandir menu";
+    toggle.setAttribute("aria-label", expanded ? "Contraer men\u00fa" : "Expandir men\u00fa");
+    toggle.title = expanded ? "Contraer men\u00fa" : "Expandir men\u00fa";
+    const icon = toggle.querySelector("i");
+    if (toggle === sidebarToggle && icon) {
+      icon.classList.toggle("fa-angle-left", expanded);
+      icon.classList.toggle("fa-angle-right", !expanded);
+    }
   });
   if (!persist) return;
   try {
@@ -329,7 +370,7 @@ function normalizeProduct(product) {
     slug: product.slug || id,
     sku: product.sku || id,
     nombre: product.nombre || "",
-    categoria: product.categoria || "Sin categoria",
+    categoria: product.categoria || "Sin categor\u00eda",
     descripcion: product.descripcion || product.description || "",
     tela: product.tela || product.fabric || "",
     detalle: product.detalle || product.detail || "",
@@ -392,13 +433,14 @@ function cleanProductList(records = [], options = {}) {
   const includeInactive = options.includeInactive === true;
   const merged = new Map();
   records.flatMap(expandAdminRecord).forEach((record) => {
+    if (isReferenceOnlyRecord(record)) return;
     const normalized = normalizeProduct(record);
+    if (isReferenceOnlyRecord(normalized)) return;
     const key = productIdentityKey(normalized);
     merged.set(key, mergeProductRecord(merged.get(key), normalized));
   });
   return Array.from(merged.values()).filter((product) => includeInactive || product.active !== false);
 }
-
 function mergeCatalogRecords(base, stored) {
   if (window.VyoreCatalog?.mergeCatalog) return window.VyoreCatalog.mergeCatalog(base, stored);
   return mergeProducts(base.map(normalizeProduct), stored);
@@ -441,9 +483,38 @@ function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function showAdmin() {
+async function hydrateAdminCatalog() {
+  if (!window.VyoreSupabase?.isConfigured?.()) {
+    adminCatalogSource = "fallback";
+    remoteCatalogMeta = null;
+    return;
+  }
+
+  try {
+    authStatus.textContent = "Cargando cat\u00e1logo desde Supabase...";
+    const remote = await window.VyoreSupabase.loadProducts({ includeInactive: true });
+    const expanded = cleanProductList(remote.products || [], { includeInactive: true });
+    products = expanded.filter((product) => product.active !== false);
+    deletedProducts = expanded.filter((product) => product.active === false);
+    remoteCatalogMeta = remote.meta || null;
+    adminCatalogSource = "supabase";
+    rowSnapshots.clear();
+    dirty = false;
+  } catch (error) {
+    adminCatalogSource = "fallback";
+    remoteCatalogMeta = null;
+    notify({
+      type: "warning",
+      title: "Supabase no respondi\u00f3",
+      text: "Se carg\u00f3 el inventario local de respaldo.",
+    });
+  }
+}
+
+async function showAdmin() {
   const session = activeSession || requireSession();
   if (!session) return;
+  await hydrateAdminCatalog();
   document.body.classList.remove("login-mode");
   document.body.classList.add("admin-mode");
   setSidebarCollapsed(storedSidebarCollapsed(), false);
@@ -478,10 +549,10 @@ function setView(view) {
 }
 
 function renderMeta() {
-  const storedMeta = loadStoredMeta();
+  const storedMeta = adminCatalogSource === "supabase" ? remoteCatalogMeta || {} : loadStoredMeta();
   const priceDate = storedMeta.actualizadoPrecios || baseMeta.actualizadoPrecios || "2026-07-09";
   const stockDate = storedMeta.actualizadoStock || baseMeta.actualizadoStock;
-  adminMeta.textContent = `Actualizado: ${formatDate(priceDate)} · Stock: ${formatDate(stockDate)}`;
+  adminMeta.textContent = `Actualizado: ${formatDate(priceDate)} \u00b7 Stock: ${formatDate(stockDate)}`;
 }
 
 function renderStats() {
@@ -509,13 +580,12 @@ function renderRows() {
 function renderEmptyRow() {
   const row = document.createElement("tr");
   const cell = document.createElement("td");
-  cell.colSpan = 11;
+  cell.colSpan = 9;
   cell.className = "inventory-empty";
-  cell.textContent = search ? "No hay prendas que coincidan con la busqueda." : "No hay prendas activas en el inventario.";
+  cell.textContent = search ? "No hay prendas que coincidan con la b\u00fasqueda." : "No hay prendas activas en el inventario.";
   row.appendChild(cell);
   return row;
 }
-
 function renderCategoryOptions() {
   const values = categories();
   categoryOptions.innerHTML = "";
@@ -573,27 +643,21 @@ function renderSkuCell(product, isEditing) {
   if (isEditing) {
     const skuInput = input("text", product.sku, "sku");
     skuInput.className = "stock-input";
-    const id = document.createElement("span");
-    id.className = "row-id";
-    id.textContent = product.id;
-    cell.append(skuInput, id);
+    cell.appendChild(skuInput);
     return cell;
   }
-  cell.innerHTML = `<strong class="sku-code">${product.sku || product.id}</strong><span class="row-id">${product.id}</span>`;
+  cell.innerHTML = `<strong class="sku-code">${product.sku || product.id}</strong>`;
   return cell;
 }
-
 function renderImageCell(product, isEditing) {
   const cell = document.createElement("td");
   cell.className = "image-cell";
   const wrap = document.createElement("div");
-  wrap.className = `image-editor${isEditing ? "" : " readonly"}`;
+  wrap.className = `image-editor${isEditing ? "" : " readonly image-only"}`;
   const preview = imageNode(product);
   if (!isEditing) {
-    const imagePath = document.createElement("span");
-    imagePath.className = "image-path";
-    imagePath.textContent = product.imagen || "Sin imagen";
-    wrap.append(preview, imagePath);
+    preview.title = product.imagen || "Sin imagen";
+    wrap.appendChild(preview);
     cell.appendChild(wrap);
     return cell;
   }
@@ -606,7 +670,6 @@ function renderImageCell(product, isEditing) {
   cell.appendChild(wrap);
   return cell;
 }
-
 function renderNameCell(product, isEditing) {
   const cell = document.createElement("td");
   if (isEditing) {
@@ -629,7 +692,7 @@ function renderColorCell(product, isEditing) {
     colorSwatch.value = product.colorHex || "#817A75";
     colorSwatch.dataset.field = "colorHex";
     colorSwatch.addEventListener("input", (event) => updateProduct(event.target));
-    const colorInput = input("text", product.colorName || "Color por confirmar", "colorName");
+    const colorInput = input("text", product.colorName || "", "colorName");
     colorInput.className = "color-input";
     colorWrap.append(colorSwatch, colorInput);
     cell.appendChild(colorWrap);
@@ -641,7 +704,7 @@ function renderColorCell(product, isEditing) {
   dot.className = "color-dot";
   dot.style.backgroundColor = product.colorHex || "#817A75";
   const name = document.createElement("strong");
-  name.textContent = product.colorName || "Color por confirmar";
+  name.textContent = product.colorName || "Sin color";
   wrap.append(dot, name);
   cell.appendChild(wrap);
   return cell;
@@ -694,19 +757,22 @@ function renderFeaturedCell(product, isEditing) {
     cell.appendChild(featuredInput);
     return cell;
   }
-  cell.innerHTML = `<span class="feature-badge${product.destacado ? " active" : ""}">${product.destacado ? "Destacado" : "No"}</span>`;
+  const isFeatured = Boolean(product.destacado);
+  const labelText = isFeatured ? "S\u00ed" : "No";
+  const iconStyle = isFeatured ? "fas" : "far";
+  cell.innerHTML = `<span class="feature-badge${isFeatured ? " active" : ""}" title="${isFeatured ? "Destacado" : "No destacado"}"><i class="${iconStyle} fa-star" aria-hidden="true"></i><span>${labelText}</span></span>`;
   return cell;
 }
-
 function actionButton(kind, icon, text, handler) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = `row-action ${kind}`;
-  button.innerHTML = `<i class="fas ${icon}" aria-hidden="true"></i><span>${text}</span>`;
+  button.title = text;
+  button.setAttribute("aria-label", text);
+  button.innerHTML = `<i class="fas ${icon}" aria-hidden="true"></i><span class="sr-only">${text}</span>`;
   button.addEventListener("click", handler);
   return button;
 }
-
 function renderActionsCell(product, isEditing) {
   const cell = document.createElement("td");
   cell.className = "actions-cell";
@@ -733,23 +799,26 @@ function renderProductRow(product) {
   row.dataset.id = product.id;
   row.className = isEditing ? "is-editing" : "";
 
-  row.append(
-    renderSkuCell(product, isEditing),
-    renderImageCell(product, isEditing),
-    renderNameCell(product, isEditing),
-    renderColorCell(product, isEditing),
-    renderCategoryCell(product, isEditing),
-    renderPriceCell(product, "precioPublico", isEditing),
-    renderPriceCell(product, "precioAlumno", isEditing),
-    renderStockCell(product, isEditing),
-    renderStatusCell(row, product, isEditing),
-    renderFeaturedCell(product, isEditing),
-    renderActionsCell(product, isEditing),
-  );
+  const cells = [
+    ["SKU", renderSkuCell(product, isEditing)],
+    ["Nombre", renderNameCell(product, isEditing)],
+    ["Color", renderColorCell(product, isEditing)],
+    ["Imagen", renderImageCell(product, isEditing)],
+    ["Precio", renderPriceCell(product, "precioPublico", isEditing)],
+    ["Stock", renderStockCell(product, isEditing)],
+    ["Estado", renderStatusCell(row, product, isEditing)],
+    ["Destacado", renderFeaturedCell(product, isEditing)],
+    ["Acciones", renderActionsCell(product, isEditing)],
+  ];
+
+  cells.forEach(([labelText, cell]) => {
+    cell.dataset.label = labelText;
+    row.appendChild(cell);
+  });
+
   if (isEditing) syncFeaturedEligibility(row, product);
   return row;
 }
-
 function input(type, value, field) {
   const el = document.createElement("input");
   el.type = type;
@@ -785,7 +854,7 @@ function categories() {
 
 function label(value) {
   const labels = {
-    Panaderia: "Panadería",
+    Panaderia: "Panader\u00eda",
     consultar: "Consultar",
     disponible: "Disponible",
     bajo: "Bajo stock",
@@ -833,13 +902,15 @@ function findDuplicateProduct(product, currentId = null) {
 function validateProductRecord(product, currentId = null) {
   if (!String(product.sku || "").trim()) return "La prenda necesita SKU.";
   if (!String(product.nombre || "").trim()) return "La prenda necesita nombre.";
-  if (!String(product.categoria || "").trim()) return "La prenda necesita categoria.";
-  if (!Number.isFinite(toNumber(product.precioPublico, NaN))) return "El precio publico no es valido.";
+  if (!String(product.categoria || "").trim()) return "La prenda necesita categor\u00eda.";
+  if (!String(product.colorName || product.color || product.nombreColor || "").trim()) return "La prenda necesita un color vendible.";
+  if (hasPlaceholderColor(product.colorId, product.colorName, product.color, product.nombreColor)) return "La prenda necesita un color vendible.";
+  if (isReferenceImagePath(product.imagen || product.image || product.variantImage)) return "Usa una imagen de variante vendible, no una imagen referencial del modelo.";
+  if (!Number.isFinite(toNumber(product.precioPublico, NaN))) return "El precio p\u00fablico no es v\u00e1lido.";
   const duplicate = findDuplicateProduct(product, currentId);
   if (duplicate) return `Ya existe ${duplicate.nombre} en color ${duplicate.colorName || "registrado"}.`;
   return "";
 }
-
 function removeDeletedOverrideFor(product) {
   const key = productIdentityKey(product);
   deletedProducts = deletedProducts.filter((item) => productIdentityKey(item) !== key);
@@ -912,13 +983,13 @@ async function deleteProductRow(id) {
   });
   if (!ok) return;
 
-  if (baseProductKeys.has(productIdentityKey(product))) upsertDeletedOverride(product);
+  if (adminCatalogSource === "supabase" || baseProductKeys.has(productIdentityKey(product))) upsertDeletedOverride(product);
   else removeDeletedOverrideFor(product);
   products = products.filter((item) => item.id !== id);
   rowSnapshots.delete(id);
   dirty = true;
   renderRows();
-  notify({ type: "success", title: "Prenda eliminada", text: "La tienda dejara de mostrar esta prenda cuando guardes los cambios." });
+  notify({ type: "success", title: "Prenda eliminada", text: "La tienda dejar\u00e1 de mostrar esta prenda cuando guardes los cambios." });
 }
 
 function updateProduct(control) {
@@ -1006,14 +1077,14 @@ function productFromForm(form) {
   const nombre = String(data.get("nombre") || "").trim();
   const sku = String(data.get("sku") || "").trim() || nextSku();
   const modelName = nombre;
-  const colorName = String(data.get("colorName") || "").trim() || "Color por confirmar";
+  const colorName = String(data.get("colorName") || "").trim();
   const colorHex = String(data.get("colorHex") || "").trim() || "#817A75";
   const categoria = String(data.get("categoria") || "").trim();
   const precioPublico = toNumber(data.get("precioPublico"), NaN);
   const precioAlumno = toNumber(data.get("precioAlumno") ?? data.get("precioRegular"), precioPublico);
   const stock = parseStock(data.get("stock"));
 
-  if (!nombre || !categoria || !Number.isFinite(precioPublico)) return null;
+  if (!nombre || !colorName || !categoria || !Number.isFinite(precioPublico)) return null;
 
   return normalizeProduct({
     id: uniqueId(`${modelName} ${colorName}`),
@@ -1047,7 +1118,7 @@ function addProduct(event) {
   if (!requireSession(true)) return;
   const product = productFromForm(productForm);
   if (!product) {
-    notify({ type: "warning", title: "Datos incompletos", text: "Completa producto, categoría y precio público." });
+    notify({ type: "warning", title: "Datos incompletos", text: "Completa producto, color, categor\u00eda y precio p\u00fablico." });
     return;
   }
 
@@ -1064,10 +1135,10 @@ function addProduct(event) {
   adminSearch.value = "";
   resetProductForm();
   renderRows();
-  notify({ type: "success", title: "Producto agregado", text: `${product.nombre} fue agregado al catálogo local.` });
+  notify({ type: "success", title: "Producto agregado", text: `${product.nombre} fue agregado al cat\u00e1logo local.` });
 }
 
-function saveProducts() {
+async function saveProducts() {
   if (!requireSession(true)) return;
   const normalized = products.map((product) => {
     const copy = normalizeProduct(product);
@@ -1080,38 +1151,63 @@ function saveProducts() {
   const combined = cleanProductList([...deletedProducts, ...normalized], { includeInactive: true });
   const meta = {
     ...baseMeta,
+    ...(adminCatalogSource === "supabase" ? remoteCatalogMeta || {} : loadStoredMeta()),
     actualizadoStock: todayIso(),
     actualizadoPrecios: todayIso(),
   };
+
+  if (window.VyoreSupabase?.isConfigured?.() && activeSession?.provider === "supabase") {
+    try {
+      const remote = await window.VyoreSupabase.saveCatalog(combined, meta);
+      const expanded = cleanProductList(remote.products || [], { includeInactive: true });
+      products = expanded.filter((product) => product.active !== false);
+      deletedProducts = expanded.filter((product) => product.active === false);
+      remoteCatalogMeta = remote.meta || meta;
+      adminCatalogSource = "supabase";
+      rowSnapshots.clear();
+      dirty = false;
+      renderMeta();
+      renderRows();
+      notify({ type: "success", title: "Cambios guardados", text: "El cat\u00e1logo global fue actualizado en Supabase." });
+      return;
+    } catch (error) {
+      notify({
+        type: "error",
+        title: "No se pudo guardar en Supabase",
+        text: error.message || "Revisa la sesi\u00f3n del administrador y las pol\u00edticas de la base.",
+      });
+      return;
+    }
+  }
+
   localStorage.setItem(PRODUCT_KEY, JSON.stringify(combined));
   localStorage.setItem(META_KEY, JSON.stringify(meta));
   deletedProducts = combined.filter((product) => product.active === false);
   products = combined.filter((product) => product.active !== false);
+  remoteCatalogMeta = null;
+  adminCatalogSource = "fallback";
   rowSnapshots.clear();
   dirty = false;
   renderMeta();
   renderRows();
-  notify({ type: "success", title: "Cambios guardados", text: "El catálogo local fue actualizado sin duplicados." });
+  notify({ type: "success", title: "Cambios guardados", text: "El cat\u00e1logo local fue actualizado sin duplicados." });
 }
 
 function exportProductsXlsx() {
   if (!requireSession(true)) return;
   const rows = [
-    ["ID", "SKU", "Producto", "Color", "Categoría", "Precio público", "Precio regular", "Stock", "Estado", "Destacado", "Imagen"],
+    ["SKU", "Nombre", "Color", "Imagen", "Precio", "Stock", "Estado", "Destacado"],
     ...products.map((product) => {
       const normalized = normalizeProduct(product);
       return [
-        normalized.id,
         normalized.sku,
         normalized.nombre,
         normalized.colorName || "",
-        normalized.categoria,
+        normalized.imagen,
         normalized.precioPublico,
-        normalized.precioAlumno,
         normalized.stock ?? "",
         label(normalized.disponibilidad),
-        normalized.destacado ? "Sí" : "No",
-        normalized.imagen,
+        normalized.destacado ? "S\u00ed" : "No",
       ];
     }),
   ];
@@ -1344,7 +1440,7 @@ loginForm.addEventListener("submit", async (event) => {
     loginError.textContent = "";
     loginForm.reset();
     await sleep(420);
-    showAdmin();
+    await showAdmin();
   } catch (error) {
     showLogin();
     notify({ type: "error", title: "No se pudo verificar", text: error.message || "Intenta nuevamente." });
@@ -1360,7 +1456,7 @@ if (togglePassword && adminPasswordInput) {
     adminPasswordInput.type = shouldShow ? "text" : "password";
     togglePassword.classList.toggle("active", shouldShow);
     togglePassword.setAttribute("aria-pressed", String(shouldShow));
-    togglePassword.setAttribute("aria-label", shouldShow ? "Ocultar contraseña" : "Mostrar contraseña");
+    togglePassword.setAttribute("aria-label", shouldShow ? "Ocultar contrase\u00f1a" : "Mostrar contrase\u00f1a");
   });
 }
 
@@ -1374,7 +1470,7 @@ clearProductForm.addEventListener("click", resetProductForm);
 document.querySelector("#saveProducts").addEventListener("click", saveProducts);
 document.querySelector("#exportExcel").addEventListener("click", () => {
   exportProductsXlsx();
-  notify({ type: "success", title: "Excel exportado", text: "Se descargó una copia del catálogo en formato XLSX." });
+  notify({ type: "success", title: "Excel exportado", text: "Se descarg\u00f3 una copia del cat\u00e1logo en formato XLSX." });
 });
 document.querySelectorAll(".sidebar-link").forEach((button) => {
   button.addEventListener("click", () => setView(button.dataset.view));
@@ -1387,11 +1483,14 @@ document.querySelector("#logoutButton").addEventListener("click", async () => {
     const ok = await askConfirm({
       type: "warning",
       title: "Cambios sin guardar",
-      text: "Si sales ahora, los cambios no guardados se perderán.",
+      text: "Si sales ahora, los cambios no guardados se perder\u00e1n.",
       confirmText: "Salir",
       cancelText: "Seguir editando",
     });
     if (!ok) return;
+  }
+  if (activeSession?.provider === "supabase") {
+    await window.VyoreSupabase?.signOut?.();
   }
   clearSession();
   dirty = false;
@@ -1409,7 +1508,7 @@ resetProductForm();
 localStorage.removeItem(AUTH_LEGACY_KEY);
 activeSession = loadSession();
 if (activeSession) {
-  showAuthLoading("Restaurando sesión y validando acceso...");
+  showAuthLoading("Restaurando sesi\u00f3n y validando acceso...");
   window.setTimeout(() => showAdmin(), 450);
 }
 
@@ -1417,22 +1516,3 @@ window.setInterval(() => {
   if (adminPanel.hidden) return;
   if (!loadSession()) requireSession(true);
 }, 60000);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
